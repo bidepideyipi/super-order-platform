@@ -93,23 +93,13 @@ CREATE TABLE IF NOT EXISTS user (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS import_log (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    import_type VARCHAR(50) NOT NULL COMMENT '导入类型',
-    file_name VARCHAR(200) COMMENT '文件名',
-    total_count INT DEFAULT 0 COMMENT '总记录数',
-    success_count INT DEFAULT 0 COMMENT '成功数',
-    failed_count INT DEFAULT 0 COMMENT '失败数',
-    error_detail TEXT COMMENT '错误详情',
-    created_by BIGINT COMMENT '创建人ID',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 INSERT IGNORE INTO sku_category (category_id, category_name) VALUES
 ('01', '食品'),
 ('02', '纸品'),
 ('03', '个护'),
-('04', '百货');
+('04', '百货'),
+('05', '电器'),
+('06', '服饰床品');
 
 INSERT IGNORE INTO customer (customer_id, customer_name) VALUES
 ('FZC', '方舟'),

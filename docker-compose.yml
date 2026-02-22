@@ -7,11 +7,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-super_order}
-      MYSQL_USER: ${MYSQL_USER:-root}
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]

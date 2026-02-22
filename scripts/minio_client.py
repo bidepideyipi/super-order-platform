@@ -45,14 +45,19 @@ class MinIOClient:
 
     def upload_from_memory(self, data: bytes, object_name: str):
         try:
+            from io import BytesIO
+            data_stream = BytesIO(data)
+            
             self.client.put_object(
                 self.bucket_name,
                 object_name,
-                data,
+                data_stream,
                 length=len(data),
+                part_size=5*1024*1024
             )
             logger.info(f"Uploaded data as {object_name}")
-            return f"{MINIO_ENDPOINT}/{self.bucket_name}/{object_name}"
+            protocol = "https" if MINIO_SECURE else "http"
+            return f"{protocol}://{MINIO_ENDPOINT}/{self.bucket_name}/{object_name}"
         except S3Error as e:
             logger.error(f"Error uploading from memory: {e}")
             raise
@@ -66,4 +71,5 @@ class MinIOClient:
             return []
 
     def get_file_url(self, object_name: str):
-        return f"{MINIO_ENDPOINT}/{self.bucket_name}/{object_name}"
+        protocol = "https" if MINIO_SECURE else "http"
+        return f"{protocol}://{MINIO_ENDPOINT}/{self.bucket_name}/{object_name}"

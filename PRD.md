@@ -4,7 +4,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 文档版本 | v1.4 |
+| 文档版本 | v1.5 |
 | 创建日期 | 2025-02-21 |
 | 更新日期 | 2025-02-21 |
 | 项目名称 | Super Order 订单管理系统 |
@@ -436,21 +436,6 @@ CREATE TABLE user (
     is_active BOOLEAN DEFAULT TRUE COMMENT '是否启用',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### 4.3.2 import_log (导入日志表)
-```sql
-CREATE TABLE import_log (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    import_type VARCHAR(50) NOT NULL COMMENT '导入类型',
-    file_name VARCHAR(200) COMMENT '文件名',
-    total_count INT DEFAULT 0 COMMENT '总记录数',
-    success_count INT DEFAULT 0 COMMENT '成功数',
-    failed_count INT DEFAULT 0 COMMENT '失败数',
-    error_detail TEXT COMMENT '错误详情',
-    created_by BIGINT COMMENT '创建人ID',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
