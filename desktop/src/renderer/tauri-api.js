@@ -43,11 +43,13 @@ const tauriAPI = {
   
   sku: {
     list: () => invoke('sku_list'),
+    listPaginated: (page, pageSize) => invoke('sku_list_paginated', { page, pageSize }),
     get: (id) => invoke('sku_get', { id }),
     create: (data) => invoke('sku_create', { data }),
     update: (id, data) => invoke('sku_update', { id, data }),
     delete: (id) => invoke('sku_delete', { id }),
-    search: (keyword) => invoke('sku_search', { keyword })
+    search: (keyword) => invoke('sku_search', { keyword }),
+    searchWithCategory: (keyword, categoryId) => invoke('sku_search_with_category', { keyword, categoryId })
   },
   
   category: {

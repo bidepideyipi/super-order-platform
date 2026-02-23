@@ -6,8 +6,6 @@
           <span>SKU 管理</span>
           <div class="header-actions">
             <el-button type="primary" @click="handleAdd">新增 SKU</el-button>
-            <el-button @click="handleImport">导入</el-button>
-            <el-button @click="handleExport">导出</el-button>
           </div>
         </div>
       </template>
@@ -23,15 +21,6 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        
-        <el-select v-model="filterCategory" placeholder="选择分类" clearable style="width: 150px;">
-          <el-option
-            v-for="cat in categories"
-            :key="cat.category_id"
-            :label="cat.category_name"
-            :value="cat.category_id"
-          />
-        </el-select>
       </div>
       
       <el-table
@@ -43,10 +32,16 @@
       >
         <el-table-column type="selection" width="55" />
         <el-table-column prop="sku_code" label="SKU编号" width="100" />
+        <el-table-column label="产品图片" width="100">
+          <template #default="{ row }">
+            <img v-if="row.image_path" :src="getImageUrl(row.image_path)" style="width: 60px; height: 60px; object-fit: cover;" />
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="产品名称" min-width="200" />
-        <el-table-column prop="category_name" label="分类" width="100" />
+        <el-table-column prop="category_name" label="分类" width="80" />
         <el-table-column prop="unit" label="单位" width="80" />
-        <el-table-column prop="box_spec" label="箱规" width="100" />
+        <el-table-column prop="box_spec" label="箱规" width="160" />
         <el-table-column prop="cost_price" label="成本价" width="100" align="right">
           <template #default="{ row }">
             {{ row.cost_price.toFixed(2) }}
@@ -57,17 +52,6 @@
             {{ row.sale_price.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column prop="image_path" label="图片" width="80">
-          <template #default="{ row }">
-            <el-image
-              v-if="row.image_path"
-              :src="getImageUrl(row.image_path)"
-              :preview-src-list="[getImageUrl(row.image_path)]"
-              fit="cover"
-              style="width: 40px; height: 40px;"
-            />
-          </template>
-        </el-table-column>
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
@@ -75,6 +59,18 @@
           </template>
         </el-table-column>
       </el-table>
+      
+      <div class="pagination-container" v-if="!isSearching">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
     </el-card>
     
     <el-dialog
@@ -83,6 +79,23 @@
       width="600px"
     >
       <el-form :model="form" label-width="100px">
+        <el-form-item label="产品图片">
+          <div class="image-upload-container">
+            <el-upload
+              :auto-upload="false"
+              :show-file-list="false"
+              accept="image/*"
+              :on-change="handleImageChange"
+              class="image-uploader"
+            >
+              <img v-if="form.image_path" :src="getImageUrl(form.image_path)" class="image-preview" />
+              <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
+            </el-upload>
+            <el-button v-if="form.image_path" size="small" type="danger" @click="handleRemoveImage" style="margin-left: 10px;">
+              删除图片
+            </el-button>
+          </div>
+        </el-form-item>
         <el-form-item label="产品名称">
           <el-input v-model="form.name" placeholder="请输入产品名称" />
         </el-form-item>
@@ -99,6 +112,9 @@
         <el-form-item label="单位">
           <el-input v-model="form.unit" placeholder="请输入单位" />
         </el-form-item>
+        <el-form-item label="规格">
+          <el-input v-model="form.spec" placeholder="请输入规格" />
+        </el-form-item>
         <el-form-item label="箱规">
           <el-input v-model="form.box_spec" placeholder="请输入箱规" />
         </el-form-item>
@@ -107,9 +123,6 @@
         </el-form-item>
         <el-form-item label="销售价">
           <el-input-number v-model="form.sale_price" :precision="2" :min="0" />
-        </el-form-item>
-        <el-form-item label="规格">
-          <el-input v-model="form.spec" type="textarea" placeholder="请输入规格" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -123,15 +136,18 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search } from '@element-plus/icons-vue';
+import { Search, Plus } from '@element-plus/icons-vue';
+import { readBinaryFile, writeBinaryFile, BaseDirectory, createDir } from '@tauri-apps/api/fs';
 
 const skus = ref([]);
 const categories = ref([]);
 const searchKeyword = ref('');
-const filterCategory = ref('');
 const selectedRows = ref([]);
 const dialogVisible = ref(false);
 const dialogMode = ref('add');
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
 const form = ref({
   name: '',
   category_id: '',
@@ -139,52 +155,82 @@ const form = ref({
   box_spec: '',
   cost_price: 0,
   sale_price: 0,
-  spec: ''
+  spec: '',
+  image_path: ''
+});
+
+const isSearching = computed(() => {
+  return !!searchKeyword.value;
 });
 
 const filteredSKUs = computed(() => {
-  let result = skus.value;
-  
-  if (filterCategory.value) {
-    result = result.filter(sku => sku.category_id === filterCategory.value);
-  }
-  
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase();
-    result = result.filter(sku => 
-      sku.sku_code.toLowerCase().includes(keyword) || 
-      sku.name.toLowerCase().includes(keyword)
-    );
-  }
-  
-  return result;
+  return skus.value;
 });
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  return path.startsWith('data/') ? `file://${process.cwd()}/${path}` : path;
+const loadImageUrls = (skuList) => {
+  return skuList.map(sku => {
+    if (sku.image_path && sku.image_path.startsWith('data/')) {
+      const imagePath = sku.image_path.replace('data/', '/images/');
+      const imageUrl = `.${imagePath}`;
+      console.log(`Converted ${sku.image_path} -> ${imageUrl}`);
+      return {
+        ...sku,
+        image_url: imageUrl
+      };
+    }
+    return {
+      ...sku,
+      image_url: sku.image_path
+    };
+  });
 };
 
 const loadData = async () => {
   try {
-    console.log('开始加载 SKU 数据...');
-    const [skuList, categoryList] = await Promise.all([
-      window.electronAPI.sku.list(),
+    console.log('开始加载 SKU 数据，页码:', currentPage.value, '每页:', pageSize.value);
+    const [result, categoryList] = await Promise.all([
+      window.electronAPI.sku.listPaginated(currentPage.value, pageSize.value),
       window.electronAPI.category.list()
     ]);
-    console.log('SKU 数据加载完成:', skuList.length, '个 SKU');
+    console.log('SKU 数据加载完成:', result.data.length, '个 SKU');
+    console.log('总记录数:', result.total, '总页数:', result.total_pages);
     console.log('分类数据加载完成:', categoryList.length, '个分类');
-    skus.value = skuList;
+    
+    skus.value = await loadImageUrls(result.data);
+    total.value = result.total;
     categories.value = categoryList;
-    ElMessage.success(`成功加载 ${skuList.length} 个 SKU`);
   } catch (error) {
     console.error('加载数据失败:', error);
     ElMessage.error('加载数据失败: ' + (error.message || error));
   }
 };
 
-const handleSearch = () => {
+const handleSearch = async () => {
+  currentPage.value = 1;
   
+  if (searchKeyword.value) {
+    try {
+      const result = await window.electronAPI.sku.search(searchKeyword.value);
+      skus.value = await loadImageUrls(result);
+      total.value = result.length;
+    } catch (error) {
+      console.error('搜索失败:', error);
+      ElMessage.error('搜索失败: ' + (error.message || error));
+    }
+  } else {
+    loadData();
+  }
+};
+
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  handleSearch();
+};
+
+const handleSizeChange = (size) => {
+  pageSize.value = size;
+  currentPage.value = 1;
+  handleSearch();
 };
 
 const handleAdd = () => {
@@ -196,7 +242,8 @@ const handleAdd = () => {
     box_spec: '',
     cost_price: 0,
     sale_price: 0,
-    spec: ''
+    spec: '',
+    image_path: ''
   };
   dialogVisible.value = true;
 };
@@ -205,6 +252,45 @@ const handleEdit = (row) => {
   dialogMode.value = 'edit';
   form.value = { ...row };
   dialogVisible.value = true;
+};
+
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('data/')) {
+    const imagePathClean = imagePath.replace('data/', '/images/');
+    return `.${imagePathClean}`;
+  }
+  return imagePath;
+};
+
+const handleImageChange = async (file) => {
+  try {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const imageData = e.target.result;
+      const imageBytes = new Uint8Array(atob(imageData.split(',')[1]).split('').map(c => c.charCodeAt(0)));
+      
+      const fileName = `sku_${Date.now()}_${file.name}`;
+      const imagePath = `data/${fileName}`;
+      
+      try {
+        await createDir('data', { recursive: true, dir: BaseDirectory.Resource });
+      } catch (error) {
+        console.log('Data directory may already exist:', error);
+      }
+      
+      await writeBinaryFile(imagePath, imageBytes, { dir: BaseDirectory.Resource });
+      form.value.image_path = imagePath;
+    };
+    reader.readAsDataURL(file.raw);
+  } catch (error) {
+    console.error('Image upload error:', error);
+    ElMessage.error('图片上传失败');
+  }
+};
+
+const handleRemoveImage = () => {
+  form.value.image_path = '';
 };
 
 const handleDelete = async (id) => {
@@ -217,7 +303,7 @@ const handleDelete = async (id) => {
     
     await window.electronAPI.sku.delete(id);
     ElMessage.success('删除成功');
-    loadData();
+    handleSearch();
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败');
@@ -236,7 +322,7 @@ const handleSave = async () => {
       ElMessage.success('更新成功');
     }
     dialogVisible.value = false;
-    loadData();
+    handleSearch();
   } catch (error) {
     ElMessage.error('保存失败');
     console.error(error);
@@ -245,28 +331,6 @@ const handleSave = async () => {
 
 const handleSelectionChange = (selection) => {
   selectedRows.value = selection;
-};
-
-const handleImport = async () => {
-  try {
-    const filePaths = await window.electronAPI.openFile();
-    if (filePaths && filePaths.length > 0) {
-      ElMessage.success('导入功能开发中');
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const handleExport = async () => {
-  try {
-    const filePath = await window.electronAPI.saveFile('sku_export.xlsx');
-    if (filePath) {
-      ElMessage.success('导出功能开发中');
-    }
-  } catch (error) {
-    console.error(error);
-  }
 };
 
 onMounted(() => {
@@ -293,5 +357,46 @@ onMounted(() => {
 .toolbar {
   display: flex;
   gap: 10px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.image-upload-container {
+  display: flex;
+  align-items: center;
+}
+
+.image-uploader {
+  display: inline-block;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.image-uploader:hover {
+  border-color: #409eff;
+}
+
+.image-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

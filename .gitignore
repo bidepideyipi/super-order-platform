@@ -53,3 +53,4 @@ desktop/dist/
 desktop/build/
 desktop/.DS_Store
 desktop/src-tauri/target/
+desktop/public/images/sku/

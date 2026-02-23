@@ -36,15 +36,39 @@ pub fn sku_list() -> Result<Vec<db::SKU>, String> {
 }
 
 #[tauri::command]
+pub fn sku_list_paginated(page: usize, pageSize: usize) -> Result<db::PaginatedResult<db::SKU>, String> {
+    println!("sku_list_paginated called: page={}, pageSize={}", page, pageSize);
+    match db::get_skus_paginated(page, pageSize) {
+        Ok(result) => {
+            println!("sku_list_paginated success: {} items, total: {}", result.data.len(), result.total);
+            Ok(result)
+        }
+        Err(e) => {
+            println!("sku_list_paginated error: {}", e);
+            Err(e.to_string())
+        }
+    }
+}
+
+#[tauri::command]
 pub fn sku_get(_id: String) -> Result<Option<db::SKU>, String> {
     println!("sku_get called with id: {}", _id);
     Ok(None)
 }
 
 #[tauri::command]
-pub fn sku_create(_data: db::SKU) -> Result<db::SKU, String> {
+pub fn sku_create(data: db::SKU) -> Result<db::SKU, String> {
     println!("sku_create called");
-    Ok(_data)
+    match db::create_sku(data) {
+        Ok(sku) => {
+            println!("sku_create success: {} with sku_code {:?}", sku.name, sku.sku_code);
+            Ok(sku)
+        }
+        Err(e) => {
+            println!("sku_create error: {}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
@@ -60,9 +84,15 @@ pub fn sku_delete(_id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn sku_search(_keyword: String) -> Result<Vec<db::SKU>, String> {
-    println!("sku_search called with keyword: {}", _keyword);
-    Ok(vec![])
+pub fn sku_search(keyword: String) -> Result<Vec<db::SKU>, String> {
+    println!("sku_search called with keyword: {}", keyword);
+    db::search_skus(&keyword).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn sku_search_with_category(keyword: String, category_id: Option<String>) -> Result<Vec<db::SKU>, String> {
+    println!("sku_search_with_category called with keyword: {}, category_id: {:?}", keyword, category_id);
+    db::search_skus_by_keyword_and_category(&keyword, category_id.as_deref()).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
