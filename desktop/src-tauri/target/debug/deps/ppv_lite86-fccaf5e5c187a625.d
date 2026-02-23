@@ -1,0 +1,11 @@
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/ppv_lite86-fccaf5e5c187a625.d: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/soft.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/types.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/sse2.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libppv_lite86-fccaf5e5c187a625.rlib: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/soft.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/types.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/sse2.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libppv_lite86-fccaf5e5c187a625.rmeta: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/soft.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/types.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/sse2.rs
+
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/lib.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/soft.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/types.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/mod.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ppv-lite86-0.2.21/src/x86_64/sse2.rs:

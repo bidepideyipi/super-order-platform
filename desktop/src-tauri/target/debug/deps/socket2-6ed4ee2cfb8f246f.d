@@ -1,0 +1,11 @@
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/socket2-6ed4ee2cfb8f246f.d: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockaddr.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/socket.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockref.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sys/unix.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libsocket2-6ed4ee2cfb8f246f.rlib: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockaddr.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/socket.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockref.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sys/unix.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libsocket2-6ed4ee2cfb8f246f.rmeta: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockaddr.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/socket.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockref.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sys/unix.rs
+
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/lib.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockaddr.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/socket.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sockref.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.6.2/src/sys/unix.rs:

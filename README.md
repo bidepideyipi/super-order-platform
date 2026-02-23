@@ -4,89 +4,103 @@
 
 ## 技术栈
 
-- 后端：FastAPI + Python 3.11
-- 数据库：MySQL 8.0
-- 对象存储：MinIO
+- 桌面端：Tauri + Rust
 - 前端：Vue 3 + Element Plus
+- 数据库：SQLite
 
 ## 快速开始
 
 ### 前置要求
 
-- Docker & Docker Compose
-- Python 3.11+（本地开发）
+- Node.js 18+
+- Rust 1.70+
+- 系统依赖：
+  - macOS: Xcode Command Line Tools
+  - Linux: `libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana2.0-dev`
+  - Windows: WebView2 (Windows 11+) 或 Microsoft Visual C++ Redistributable
 
-### 使用 Docker 启动
-
-1. 复制环境变量配置文件：
-
-```bash
-cp docker/.env.example .env
-```
-
-2. 启动服务：
+### 安装 Rust
 
 ```bash
-docker-compose up -d
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
 ```
 
-3. 检查服务状态：
+### 启动桌面应用
+
+1. 进入桌面应用目录：
 
 ```bash
-docker-compose ps
+cd desktop
 ```
 
-4. 访问服务：
+2. 安装依赖：
 
-- 后端 API：http://localhost:8000
-- API 文档：http://localhost:8000/docs
-- MySQL：localhost:3306
-- MinIO Console：http://localhost:9001
+```bash
+npm install
+```
+
+3. 初始化数据库：
+
+```bash
+python ../scripts/init_db.py
+```
+
+4. 启动桌面应用：
+
+确保当前工作目录在 `desktop/` 下，然后执行：
+
+```bash
+cd desktop
+npx tauri dev
+```
+
+**注意**：必须使用 `npx tauri dev` 而不是 `npm run tauri`，因为 `tauri` 命令可能不在系统 PATH 中。
+
+这将启动：
+- Vite 开发服务器（端口 5173）
+- Tauri 桌面窗口
+- 自动热重载
+
+**其他启动选项**：
+
+- 仅前端开发（浏览器模式，使用 mock 数据）：
+  ```bash
+  npm run dev
+  ```
+
+- 构建 Tauri 应用：
+  ```bash
+  npm run tauri:build
+  ```
+
+详细的桌面应用开发文档、运行命令、API 使用方法请参考 [desktop/README.md](./desktop/README.md)
 
 ### 数据导入
 
-启动 Docker 后，执行数据导入脚本：
+数据库初始化后，可以导入 Excel 数据：
 
 ```bash
 cd scripts
-python import_orders.py ../doc/方舟产品订单表（原始记录不外发）251117.xlsx
-```
-
-或导入第二个文件：
-
-```bash
-python import_sku.py ../doc/方舟产品订单表（原始记录不外发）260112.xlsx
-```
-
-### 健康检查
-
-```bash
-curl http://localhost:8000/health
+python import_sku.py
 ```
 
 ## 项目结构
 
 ```
 super-order/
-├── backend/              # 后端项目
-│   ├── main.py          # FastAPI 入口
-│   ├── app/             # 应用模块
-│   │   ├── api/        # API 路由
-│   │   ├── models/     # 数据模型
-│   │   ├── schemas/    # Pydantic 模型
-│   │   ├── services/   # 业务逻辑
-│   │   └── core/       # 核心配置
-│   ├── requirements.txt # Python 依赖
-│   └── Dockerfile
+├── desktop/            # 桌面应用
+│   ├── src/
+│   │   ├── renderer/  # Vue 3 前端
+│   │   └── tauri/     # Tauri 后端 (Rust)
+│   ├── src-tauri/      # Tauri 后端目录
+│   ├── package.json
+│   └── README.md       # 桌面应用文档
 ├── scripts/            # 数据导入脚本
 │   ├── import_orders.py
 │   ├── import_sku.py
-│   ├── minio_client.py
+│   ├── init_db.py
 │   └── config.py
-├── docker/             # Docker 配置
-│   ├── docker-compose.yml
-│   ├── init.sql
-│   └── .env.example
 ├── doc/               # Excel 文件
 ├── PRD.md            # 产品需求文档
 └── 开发计划.md        # 开发计划文档
@@ -94,36 +108,11 @@ super-order/
 
 ## API 文档
 
-启动服务后，访问 http://localhost:8000/docs 查看 Swagger API 文档。
+Tauri API 通过 IPC 机制在 Rust 后端和 Vue 前端之间通信。详细的 API 使用方法请参考 [desktop/README.md](./desktop/README.md)。
 
-## 常用命令
+## 桌面应用开发
 
-### Docker
-
-```bash
-# 启动服务
-docker-compose up -d
-
-# 停止服务
-docker-compose down
-
-# 查看日志
-docker-compose logs -f backend
-
-# 重启服务
-docker-compose restart backend
-```
-
-### 本地开发
-
-```bash
-# 安装依赖
-cd backend
-pip install -r requirements.txt
-
-# 启动后端服务
-python main.py
-```
+详细的桌面应用开发文档、运行命令、API 使用方法请参考 [desktop/README.md](./desktop/README.md)。
 
 ## 数据导入说明
 

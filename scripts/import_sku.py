@@ -54,8 +54,9 @@ class SKUImporter:
                         try:
                             with open(image_path, "wb") as f:
                                 f.write(img_data)
-                            logger.info(f"Saved image for {sku_code}: {image_path}")
-                            return image_path
+                            relative_path = os.path.join("data", "images", "sku", filename)
+                            logger.info(f"Saved image for {sku_code}: {relative_path}")
+                            return relative_path
                         except Exception as e:
                             logger.error(f"Failed to save image for {sku_code}: {e}")
                             return None

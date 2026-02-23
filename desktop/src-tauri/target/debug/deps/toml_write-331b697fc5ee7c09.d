@@ -1,0 +1,11 @@
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/toml_write-331b697fc5ee7c09.d: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libtoml_write-331b697fc5ee7c09.rlib: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libtoml_write-331b697fc5ee7c09.rmeta: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs:

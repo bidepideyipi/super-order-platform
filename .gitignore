@@ -46,6 +46,9 @@ Thumbs.db
 *.log
 logs/
 
-data/*.db
-data/*.db-shm
-data/*.db-wal
+data/
+
+desktop/node_modules/
+desktop/dist/
+desktop/build/
+desktop/.DS_Store

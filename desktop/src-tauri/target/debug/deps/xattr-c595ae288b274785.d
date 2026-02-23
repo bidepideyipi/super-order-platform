@@ -1,0 +1,11 @@
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/xattr-c595ae288b274785.d: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/error.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/util.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/linux_macos.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libxattr-c595ae288b274785.rlib: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/error.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/util.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/linux_macos.rs
+
+/Users/anthony/Documents/github/super-order/desktop/src-tauri/target/debug/deps/libxattr-c595ae288b274785.rmeta: /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/lib.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/error.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/mod.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/util.rs /Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/linux_macos.rs
+
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/lib.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/error.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/mod.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/util.rs:
+/Users/anthony/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xattr-1.6.1/src/sys/linux_macos.rs:
