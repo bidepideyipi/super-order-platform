@@ -57,9 +57,9 @@ pub fn sku_get(_id: String) -> Result<Option<db::SKU>, String> {
 }
 
 #[tauri::command]
-pub fn sku_create(data: db::SKU) -> Result<db::SKU, String> {
+pub fn sku_create(data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
     println!("sku_create called");
-    match db::create_sku(data) {
+    match db::create_sku(data, image_base64) {
         Ok(sku) => {
             println!("sku_create success: {} with sku_code {:?}", sku.name, sku.sku_code);
             Ok(sku)
@@ -72,21 +72,45 @@ pub fn sku_create(data: db::SKU) -> Result<db::SKU, String> {
 }
 
 #[tauri::command]
-pub fn sku_update(_id: String, _data: db::SKU) -> Result<db::SKU, String> {
-    println!("sku_update called with id: {}", _id);
-    Ok(_data)
+pub fn sku_update(id: String, data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
+    println!("sku_update called with id: {}", id);
+    match db::update_sku(id.parse::<i64>().unwrap_or(0), data, image_base64) {
+        Ok(sku) => {
+            println!("sku_update success: {} with sku_code {:?}", sku.name, sku.sku_code);
+            Ok(sku)
+        }
+        Err(e) => {
+            println!("sku_update error: {}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
 pub fn sku_delete(_id: String) -> Result<(), String> {
     println!("sku_delete called with id: {}", _id);
-    Ok(())
+    match db::delete_sku(_id.parse::<i64>().unwrap_or(0)) {
+        Ok(_) => {
+            println!("sku_delete success");
+            Ok(())
+        }
+        Err(e) => {
+            println!("sku_delete error: {}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
 pub fn sku_search(keyword: String) -> Result<Vec<db::SKU>, String> {
     println!("sku_search called with keyword: {}", keyword);
     db::search_skus(&keyword).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn sku_search_paginated(keyword: String, page: usize, pageSize: usize) -> Result<db::PaginatedResult<db::SKU>, String> {
+    println!("sku_search_paginated called with keyword: {}, page: {}, pageSize: {}", keyword, page, pageSize);
+    db::search_skus_paginated(&keyword, page, pageSize).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

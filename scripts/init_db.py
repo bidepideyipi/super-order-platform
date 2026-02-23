@@ -36,7 +36,7 @@ def init_database():
                 box_spec TEXT,
                 cost_price REAL DEFAULT 0,
                 sale_price REAL DEFAULT 0,
-                image_path TEXT,
+                is_deleted INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (category_id) REFERENCES sku_category(category_id)

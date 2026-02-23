@@ -1,4 +1,4 @@
-#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod db;
 mod commands;
@@ -17,6 +17,7 @@ fn main() {
             commands::sku_update,
             commands::sku_delete,
             commands::sku_search,
+            commands::sku_search_paginated,
             commands::sku_search_with_category,
             commands::category_list,
             commands::customer_list,

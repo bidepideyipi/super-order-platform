@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "tauri": "npx tauri dev",
+    "tauri": "npx tauri",
     "tauri:build": "npx tauri build",
     "lint": "eslint . --ext .vue,.js,.ts",
     "typecheck": "vue-tsc --noEmit"

@@ -28,18 +28,18 @@ class SKUImporter:
     def _get_session(self):
         return self.SessionLocal()
 
-    def _save_image_from_excel(self, file_path: str, row_idx: int, sku_code: str, sheet_name: str) -> str:
+    def _save_image_from_excel(self, file_path: str, row_idx: int, sku_code: str, sheet_name: str) -> bool:
         try:
             wb = openpyxl.load_workbook(file_path)
             
             if sheet_name not in wb.sheetnames:
                 logger.warning(f"Sheet {sheet_name} not found in workbook")
-                return None
+                return False
             
             ws = wb[sheet_name]
             
             if not hasattr(ws, '_images') or not ws._images:
-                return None
+                return False
             
             for img in ws._images:
                 if hasattr(img.anchor, '_from'):
@@ -48,24 +48,23 @@ class SKUImporter:
                     if img_row == row_idx:
                         img_data = img._data()
                         
-                        filename = f"{sku_code}.{img.format}"
+                        filename = f"{sku_code}.jpeg"
                         image_path = os.path.join(IMAGE_DIR, filename)
                         
                         try:
                             with open(image_path, "wb") as f:
                                 f.write(img_data)
-                            relative_path = os.path.join("data", "images", "sku", filename)
-                            logger.info(f"Saved image for {sku_code}: {relative_path}")
-                            return relative_path
+                            logger.info(f"Saved image for SKU code {sku_code}: {filename}")
+                            return True
                         except Exception as e:
-                            logger.error(f"Failed to save image for {sku_code}: {e}")
-                            return None
+                            logger.error(f"Failed to save image for SKU code {sku_code}: {e}")
+                            return False
             
-            return None
+            return False
             
         except Exception as e:
             logger.error(f"Error extracting image from Excel: {e}")
-            return None
+            return False
 
     def _init_sku_counters(self):
         query = text("""
@@ -197,12 +196,10 @@ class SKUImporter:
                         if pd.isna(box_spec):
                             box_spec = ''
                         
-                        image_path = self._save_image_from_excel(file_path, excel_row_idx, sku_code, sheet_name)
-                        
                         insert_sku = text("""
                             INSERT OR IGNORE INTO sku 
-                            (sku_code, name, description, spec, unit, category_id, box_spec, cost_price, sale_price, image_path)
-                            VALUES (:sku_code, :name, :description, :spec, :unit, :category_id, :box_spec, :cost_price, :sale_price, :image_path)
+                            (sku_code, name, description, spec, unit, category_id, box_spec, cost_price, sale_price, is_deleted)
+                            VALUES (:sku_code, :name, :description, :spec, :unit, :category_id, :box_spec, :cost_price, :sale_price, 0)
                         """)
                         
                         session.execute(insert_sku, {
@@ -214,9 +211,11 @@ class SKUImporter:
                             "category_id": category_id,
                             "box_spec": box_spec,
                             "cost_price": float(cost_price),
-                            "sale_price": float(sale_price),
-                            "image_path": image_path
+                            "sale_price": float(sale_price)
                         })
+                        
+                        if not existing_sku:
+                            self._save_image_from_excel(file_path, excel_row_idx, sku_code, sheet_name)
                         
                         if not existing_sku:
                             success_count += 1

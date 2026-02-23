@@ -34,7 +34,7 @@
         <el-table-column prop="sku_code" label="SKU编号" width="100" />
         <el-table-column label="产品图片" width="100">
           <template #default="{ row }">
-            <img v-if="row.image_path" :src="getImageUrl(row.image_path)" style="width: 60px; height: 60px; object-fit: cover;" />
+            <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 60px; height: 60px; object-fit: cover;" />
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -88,10 +88,10 @@
               :on-change="handleImageChange"
               class="image-uploader"
             >
-              <img v-if="form.image_path" :src="getImageUrl(form.image_path)" class="image-preview" />
+              <img v-if="form.sku_code" :src="getImageUrl(form.sku_code)" class="image-preview" />
               <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
             </el-upload>
-            <el-button v-if="form.image_path" size="small" type="danger" @click="handleRemoveImage" style="margin-left: 10px;">
+            <el-button v-if="form.sku_code" size="small" type="danger" @click="handleRemoveImage" >
               删除图片
             </el-button>
           </div>
@@ -137,7 +137,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, Plus } from '@element-plus/icons-vue';
-import { readBinaryFile, writeBinaryFile, BaseDirectory, createDir } from '@tauri-apps/api/fs';
 
 const skus = ref([]);
 const categories = ref([]);
@@ -156,7 +155,8 @@ const form = ref({
   cost_price: 0,
   sale_price: 0,
   spec: '',
-  image_path: ''
+  image_path: '',
+  image_file: null
 });
 
 const isSearching = computed(() => {
@@ -168,21 +168,7 @@ const filteredSKUs = computed(() => {
 });
 
 const loadImageUrls = (skuList) => {
-  return skuList.map(sku => {
-    if (sku.image_path && sku.image_path.startsWith('data/')) {
-      const imagePath = sku.image_path.replace('data/', '/images/');
-      const imageUrl = `.${imagePath}`;
-      console.log(`Converted ${sku.image_path} -> ${imageUrl}`);
-      return {
-        ...sku,
-        image_url: imageUrl
-      };
-    }
-    return {
-      ...sku,
-      image_url: sku.image_path
-    };
-  });
+  return skuList;
 };
 
 const loadData = async () => {
@@ -207,12 +193,11 @@ const loadData = async () => {
 
 const handleSearch = async () => {
   currentPage.value = 1;
-  
   if (searchKeyword.value) {
     try {
-      const result = await window.electronAPI.sku.search(searchKeyword.value);
-      skus.value = await loadImageUrls(result);
-      total.value = result.length;
+      const result = await window.electronAPI.sku.searchPaginated(searchKeyword.value, currentPage.value, pageSize.value);
+      skus.value = await loadImageUrls(result.data);
+      total.value = result.total;
     } catch (error) {
       console.error('搜索失败:', error);
       ElMessage.error('搜索失败: ' + (error.message || error));
@@ -254,33 +239,18 @@ const handleEdit = (row) => {
   dialogVisible.value = true;
 };
 
-const getImageUrl = (imagePath) => {
-  if (!imagePath) return '';
-  if (imagePath.startsWith('data/')) {
-    const imagePathClean = imagePath.replace('data/', '/images/');
-    return `.${imagePathClean}`;
-  }
-  return imagePath;
+const getImageUrl = (skuCode) => {
+  if (!skuCode) return '';
+  return `/images/sku/${skuCode}.jpeg`;
 };
 
 const handleImageChange = async (file) => {
   try {
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const imageData = e.target.result;
-      const imageBytes = new Uint8Array(atob(imageData.split(',')[1]).split('').map(c => c.charCodeAt(0)));
-      
-      const fileName = `sku_${Date.now()}_${file.name}`;
-      const imagePath = `data/${fileName}`;
-      
-      try {
-        await createDir('data', { recursive: true, dir: BaseDirectory.Resource });
-      } catch (error) {
-        console.log('Data directory may already exist:', error);
-      }
-      
-      await writeBinaryFile(imagePath, imageBytes, { dir: BaseDirectory.Resource });
-      form.value.image_path = imagePath;
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64Data = dataUrl.split(',')[1];
+      form.value.image_file = base64Data;
     };
     reader.readAsDataURL(file.raw);
   } catch (error) {
@@ -314,11 +284,22 @@ const handleDelete = async (id) => {
 
 const handleSave = async () => {
   try {
+    const imageBase64 = form.value.image_file || null;
+    const skuData = {
+      name: form.value.name,
+      category_id: form.value.category_id,
+      unit: form.value.unit,
+      spec: form.value.spec,
+      box_spec: form.value.box_spec,
+      cost_price: form.value.cost_price,
+      sale_price: form.value.sale_price
+    };
+    
     if (dialogMode.value === 'add') {
-      await window.electronAPI.sku.create(form.value);
+      await window.electronAPI.sku.create(skuData, imageBase64);
       ElMessage.success('新增成功');
     } else {
-      await window.electronAPI.sku.update(form.value.id, form.value);
+      await window.electronAPI.sku.update(form.value.id, skuData, imageBase64);
       ElMessage.success('更新成功');
     }
     dialogVisible.value = false;
@@ -398,5 +379,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+:deep(.el-dialog__close) {
+  position: absolute;
+  right: 25px;
+  top: 25px;
 }
 </style>

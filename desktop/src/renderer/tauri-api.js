@@ -49,6 +49,7 @@ const tauriAPI = {
     update: (id, data) => invoke('sku_update', { id, data }),
     delete: (id) => invoke('sku_delete', { id }),
     search: (keyword) => invoke('sku_search', { keyword }),
+    searchPaginated: (keyword, page, pageSize) => invoke('sku_search_paginated', { keyword, page, pageSize }),
     searchWithCategory: (keyword, categoryId) => invoke('sku_search_with_category', { keyword, categoryId })
   },
   
