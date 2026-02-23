@@ -167,15 +167,19 @@ const getImageUrl = (path) => {
 
 const loadData = async () => {
   try {
+    console.log('开始加载 SKU 数据...');
     const [skuList, categoryList] = await Promise.all([
       window.electronAPI.sku.list(),
       window.electronAPI.category.list()
     ]);
+    console.log('SKU 数据加载完成:', skuList.length, '个 SKU');
+    console.log('分类数据加载完成:', categoryList.length, '个分类');
     skus.value = skuList;
     categories.value = categoryList;
+    ElMessage.success(`成功加载 ${skuList.length} 个 SKU`);
   } catch (error) {
-    ElMessage.error('加载数据失败');
-    console.error(error);
+    console.error('加载数据失败:', error);
+    ElMessage.error('加载数据失败: ' + (error.message || error));
   }
 };
 

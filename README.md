@@ -52,6 +52,7 @@ python ../scripts/init_db.py
 
 ```bash
 cd desktop
+npm run tauri
 npx tauri dev
 ```
 

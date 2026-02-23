@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { HomeFilled, Goods, Document, User } from '@element-plus/icons-vue';
 
@@ -52,6 +52,10 @@ const router = useRouter();
 const route = useRoute();
 
 const activeMenu = ref(route.path);
+
+watch(() => route.path, (newPath) => {
+  activeMenu.value = newPath;
+});
 
 const handleImport = async () => {
   try {

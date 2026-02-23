@@ -23,10 +23,16 @@ pub async fn open_external(_url: String) -> Result<(), String> {
 #[tauri::command]
 pub fn sku_list() -> Result<Vec<db::SKU>, String> {
     println!("sku_list called");
-    db::get_all_skus().map_err(|e| {
-        println!("sku_list error: {}", e);
-        e.to_string()
-    })
+    match db::get_all_skus() {
+        Ok(skus) => {
+            println!("sku_list success: {} skus returned", skus.len());
+            Ok(skus)
+        }
+        Err(e) => {
+            println!("sku_list error: {}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
