@@ -1,8 +1,8 @@
 import pandas as pd
 import openpyxl
+import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from minio_client import MinIOClient
 from config import *
 import logging
 
@@ -14,7 +14,6 @@ class SKUImporter:
     def __init__(self):
         self.engine = create_engine(DATABASE_URL)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        self.minio_client = MinIOClient()
         self.sku_counters = {
             '01': 0,
             '02': 0,
@@ -23,11 +22,13 @@ class SKUImporter:
             '05': 0,
             '06': 0
         }
+        
+        os.makedirs(IMAGE_DIR, exist_ok=True)
 
     def _get_session(self):
         return self.SessionLocal()
 
-    def _upload_image_from_excel(self, file_path: str, row_idx: int, sku_code: str, sheet_name: str) -> str:
+    def _save_image_from_excel(self, file_path: str, row_idx: int, sku_code: str, sheet_name: str) -> str:
         try:
             wb = openpyxl.load_workbook(file_path)
             
@@ -48,14 +49,15 @@ class SKUImporter:
                         img_data = img._data()
                         
                         filename = f"{sku_code}.{img.format}"
+                        image_path = os.path.join(IMAGE_DIR, filename)
                         
                         try:
-                            self.minio_client.upload_from_memory(img_data, f"sku/{filename}")
-                            url = self.minio_client.get_file_url(f"sku/{filename}")
-                            logger.info(f"Uploaded image for {sku_code}: {url}")
-                            return url
+                            with open(image_path, "wb") as f:
+                                f.write(img_data)
+                            logger.info(f"Saved image for {sku_code}: {image_path}")
+                            return image_path
                         except Exception as e:
-                            logger.error(f"Failed to upload image for {sku_code}: {e}")
+                            logger.error(f"Failed to save image for {sku_code}: {e}")
                             return None
             
             return None
@@ -65,8 +67,8 @@ class SKUImporter:
             return None
 
     def _init_sku_counters(self):
-        query = text(f"""
-            SELECT category_id, MAX(CAST(SUBSTRING(sku_code, 3) AS UNSIGNED)) as max_seq
+        query = text("""
+            SELECT category_id, MAX(CAST(SUBSTR(sku_code, 3) AS INTEGER)) as max_seq
             FROM sku 
             GROUP BY category_id
         """)
@@ -194,16 +196,12 @@ class SKUImporter:
                         if pd.isna(box_spec):
                             box_spec = ''
                         
-                        image_url = self._upload_image_from_excel(file_path, excel_row_idx, sku_code, sheet_name)
-                        if image_url:
-                            image_urls = f'["{image_url}"]'
-                        else:
-                            image_urls = '[]'
+                        image_path = self._save_image_from_excel(file_path, excel_row_idx, sku_code, sheet_name)
                         
                         insert_sku = text("""
-                            INSERT IGNORE INTO sku 
-                            (sku_code, name, description, spec, unit, category_id, box_spec, cost_price, sale_price, image_urls)
-                            VALUES (:sku_code, :name, :description, :spec, :unit, :category_id, :box_spec, :cost_price, :sale_price, :image_urls)
+                            INSERT OR IGNORE INTO sku 
+                            (sku_code, name, description, spec, unit, category_id, box_spec, cost_price, sale_price, image_path)
+                            VALUES (:sku_code, :name, :description, :spec, :unit, :category_id, :box_spec, :cost_price, :sale_price, :image_path)
                         """)
                         
                         session.execute(insert_sku, {
@@ -216,7 +214,7 @@ class SKUImporter:
                             "box_spec": box_spec,
                             "cost_price": float(cost_price),
                             "sale_price": float(sale_price),
-                            "image_urls": image_urls
+                            "image_path": image_path
                         })
                         
                         if not existing_sku:

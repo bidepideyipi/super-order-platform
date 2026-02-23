@@ -46,6 +46,6 @@ Thumbs.db
 *.log
 logs/
 
-docker/mysql-data/
-docker/minio-data/
-scripts/images/
+data/*.db
+data/*.db-shm
+data/*.db-wal

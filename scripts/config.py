@@ -3,12 +3,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:root123456@localhost:3307/super_order?charset=utf8mb4")
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
-MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME", "super-order")
-MINIO_SECURE = os.getenv("MINIO_SECURE", "False").lower() == "true"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DATABASE_PATH = os.path.join(DATA_DIR, "super_order.db")
 
-EXCEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "doc")
-IMAGE_DIR = os.path.join(os.path.dirname(__file__), "images")
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATABASE_PATH}")
+EXCEL_DIR = os.path.join(BASE_DIR, "doc")
+IMAGE_DIR = os.path.join(DATA_DIR, "images", "sku")
