@@ -27,6 +27,7 @@
         :data="filteredSKUs"
         border
         stripe
+        height="calc(100vh - 320px)"
         style="width: 100%; margin-top: 20px;"
         @selection-change="handleSelectionChange"
       >
@@ -271,7 +272,7 @@ const handleDelete = async (id) => {
       type: 'warning'
     });
     
-    await window.tauriAPI.sku.delete(id);
+    await window.tauriAPI.sku.delete(String(id));
     ElMessage.success('删除成功');
     handleSearch();
   } catch (error) {
@@ -299,7 +300,7 @@ const handleSave = async () => {
       await window.tauriAPI.sku.create(skuData, imageBase64);
       ElMessage.success('新增成功');
     } else {
-      await window.tauriAPI.sku.update(form.value.id, skuData, imageBase64);
+      await window.tauriAPI.sku.update(String(form.value.id), skuData, imageBase64);
       ElMessage.success('更新成功');
     }
     dialogVisible.value = false;

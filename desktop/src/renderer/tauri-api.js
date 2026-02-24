@@ -50,14 +50,26 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
 
       sku: {
         list: () => invoke('sku_list'),
-        listPaginated: (page, pageSize) => invoke('sku_list_paginated', { page, page_size: pageSize }),
+        listPaginated: (page, pageSize) => {
+          console.log('listPaginated 调用，参数:', { page, pageSize });
+          return invoke('sku_list_paginated', { page, pageSize });
+        },
         get: (id) => invoke('sku_get', { id }),
-        create: (data, imageBase64) => invoke('sku_create', { data, image_base64: imageBase64 }),
-        update: (id, data, imageBase64) => invoke('sku_update', { id, data, image_base64: imageBase64 }),
+        create: (data, imageBase64) => {
+          console.log('create 调用，参数:', { data, imageBase64 });
+          return invoke('sku_create', { data, imageBase64 });
+        },
+        update: (id, data, imageBase64) => {
+          console.log('update 调用，参数:', { id, data, imageBase64 });
+          return invoke('sku_update', { id, data, imageBase64 });
+        },
         delete: (id) => invoke('sku_delete', { id }),
         search: (keyword) => invoke('sku_search', { keyword }),
-        searchPaginated: (keyword, page, pageSize) => invoke('sku_search_paginated', { keyword, page, page_size: pageSize }),
-        searchWithCategory: (keyword, categoryId) => invoke('sku_search_with_category', { keyword, category_id: categoryId })
+        searchPaginated: (keyword, page, pageSize) => {
+          console.log('searchPaginated 调用，参数:', { keyword, page, pageSize });
+          return invoke('sku_search_paginated', { keyword, page, pageSize });
+        },
+        searchWithCategory: (keyword, categoryId) => invoke('sku_search_with_category', { keyword, categoryId })
       },
 
       category: {
