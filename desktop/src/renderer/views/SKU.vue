@@ -32,15 +32,15 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column prop="category_name" label="分类" width="120" />
         <el-table-column prop="sku_code" label="SKU编号" width="100" />
-        <el-table-column label="产品图片" width="100">
+        <el-table-column label="产品图片" width="100" align="center">
           <template #default="{ row }">
-            <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 60px; height: 60px; object-fit: cover;" />
+            <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 32px; height: 32px; object-fit: cover;" />
             <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="产品名称" min-width="200" />
-        <el-table-column prop="category_name" label="分类" width="80" />
         <el-table-column prop="unit" label="单位" width="80" />
         <el-table-column prop="box_spec" label="箱规" width="160" />
         <el-table-column prop="cost_price" label="成本价" width="100" align="right">
