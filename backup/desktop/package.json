@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
     "tauri": "npx tauri",
     "tauri:build": "npx tauri build",
     "lint": "eslint . --ext .vue,.js,.ts",
@@ -13,17 +12,14 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
-    "@tauri-apps/api": "^2.1.0",
+    "@tauri-apps/api": "^1.5.3",
     "element-plus": "^2.5.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.0",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0",
-    "@tauri-apps/plugin-dialog": "^2.6.0",
-    "@tauri-apps/plugin-fs": "^2.4.5",
-    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/cli": "^1.5.0",
     "@types/node": "^20.10.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "eslint": "^8.56.0",

@@ -1,56 +1,52 @@
-doc/*.xlsx
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+build/
+target/
+*.rs.bk
+*.pdb
 
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
 
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
-
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
 .DS_Store
-Thumbs.db
 
+# Logs
 *.log
-logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Desktop public images (user uploaded content)
+desktop/public/images/sku/*
+!desktop/public/images/sku/.gitkeep
+
+# OS
+Thumbs.db
+doc/*.xlsx
 data/
-
-desktop/node_modules/
-desktop/dist/
-desktop/build/
-desktop/.DS_Store
-desktop/src-tauri/target/
-desktop/public/images/sku/
+scripts/__pycache__/
+backend/__pycache__/
