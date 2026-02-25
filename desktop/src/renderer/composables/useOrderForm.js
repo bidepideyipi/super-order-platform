@@ -47,7 +47,6 @@ export function useOrderForm() {
   const handleSave = async (onSuccess) => {
     try {
       const orderData = {
-        order_no: form.value.order_no,
         customer_id: form.value.customer_id,
         order_date: form.value.order_date,
         status: form.value.status,

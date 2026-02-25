@@ -26,6 +26,14 @@ const routes = [
     }
   },
   {
+    path: '/purchases',
+    name: 'Purchases',
+    component: () => {
+      console.log('Loading Purchase component');
+      return import('../views/Purchase.vue');
+    }
+  },
+  {
     path: '/customers',
     name: 'Customers',
     component: () => {

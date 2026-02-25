@@ -50,6 +50,7 @@
             <ul>
               <li><router-link to="/sku">管理 SKU</router-link></li>
               <li><router-link to="/orders">管理订单</router-link></li>
+              <li><router-link to="/purchases">采购管理</router-link></li>
               <li><router-link to="/customers">管理客户</router-link></li>
             </ul>
           </div>

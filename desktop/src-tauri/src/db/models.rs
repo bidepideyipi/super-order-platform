@@ -34,13 +34,25 @@ pub struct Customer {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Order {
     pub id: Option<i64>,
-    pub order_no: String,
+    pub order_no: Option<String>,
     pub customer_id: String,
     pub order_date: String,
     pub status: String,
     pub total_cost_amount: f64,
     pub total_sale_amount: f64,
     pub remarks: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OrderItem {
+    pub id: Option<i64>,
+    pub order_id: i64,
+    pub sku_id: Option<i64>,
+    pub sku_code: String,
+    pub product_name: String,
+    pub quantity: i64,
+    pub unit_price: f64,
+    pub subtotal: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -38,17 +38,15 @@
             {{ row.total_cost_amount.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column prop="total_sale_amount" label="总售价" width="120" align="right">
+        <el-table-column prop="total_sale_amount" label="总售价" min-width="120" align="right">
           <template #default="{ row }">
             {{ row.total_sale_amount.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column prop="remarks" label="备注" min-width="200" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleView(row)">查看</el-button>
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
+            <el-button size="small" @click="handleEdit(row)">状态管理</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -73,10 +71,10 @@
     >
       <el-form :model="form" label-width="100px" :disabled="dialogMode === 'view'">
         <el-form-item label="订单编号">
-          <el-input v-model="form.order_no" placeholder="客户编号(3)+订单日期(yyyyMMdd)" :disabled="true" />
+          <el-input v-model="form.order_no" placeholder="自动生成" disabled />
         </el-form-item>
         <el-form-item label="客户编号">
-          <el-select v-model="form.customer_id" placeholder="请选择客户" :disabled="dialogMode === 'view'">
+          <el-select v-model="form.customer_id" placeholder="请选择客户" :disabled="dialogMode !== 'add'">
             <el-option
               v-for="customer in customers"
               :key="customer.customer_id"
@@ -92,7 +90,7 @@
             placeholder="选择日期"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
-            :disabled="dialogMode === 'view'"
+            :disabled="dialogMode !== 'add'"
           />
         </el-form-item>
         <el-form-item label="状态">
@@ -144,7 +142,7 @@ const {
   openAddDialog,
   openEditDialog,
   openViewDialog,
-  handleSave
+  handleSave: saveForm
 } = useOrderForm();
 
 const {
@@ -179,23 +177,10 @@ const handleEdit = (row) => {
   openEditDialog(row);
 };
 
-const handleDelete = async (id) => {
-  try {
-    await ElMessageBox.confirm('确定要删除该订单吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    });
-    
-    await window.tauriAPI.order.delete(String(id));
-    ElMessage.success('删除成功');
-    await loadData();
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败');
-      console.error(error);
-    }
-  }
+const handleSave = async () => {
+  await saveForm(() => {
+    loadData();
+  });
 };
 
 onMounted(async () => {

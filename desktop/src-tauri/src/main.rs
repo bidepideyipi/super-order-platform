@@ -30,7 +30,9 @@ fn main() {
             commands::order_get,
             commands::order_create,
             commands::order_update,
-            commands::order_delete
+            commands::order_delete,
+            commands::get_processing_orders,
+            commands::get_order_items
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

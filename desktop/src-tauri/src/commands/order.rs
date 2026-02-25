@@ -1,7 +1,7 @@
-use crate::db;
+use crate::db::{self, Order};
 
 #[tauri::command]
-pub fn order_list() -> Result<Vec<db::Order>, String> {
+pub fn order_list() -> Result<Vec<Order>, String> {
     println!("order_list called");
     db::get_orders().map_err(|e| {
         println!("order_list error: {}", e);
@@ -10,25 +10,40 @@ pub fn order_list() -> Result<Vec<db::Order>, String> {
 }
 
 #[tauri::command]
-pub fn order_get(_id: String) -> Result<Option<db::Order>, String> {
-    println!("order_get called with id: {}", _id);
-    Ok(None)
+pub fn order_get(id: String) -> Result<Option<Order>, String> {
+    println!("order_get called with id: {}", id);
+    let id_parsed = id.parse::<i64>().map_err(|e| e.to_string())?;
+    db::get_order(id_parsed).map_err(|e| {
+        println!("order_get error: {}", e);
+        e.to_string()
+    })
 }
 
 #[tauri::command]
-pub fn order_create(_data: db::Order) -> Result<db::Order, String> {
+pub fn order_create(data: Order) -> Result<Order, String> {
     println!("order_create called");
-    Ok(_data)
+    db::create_order(data).map_err(|e| {
+        println!("order_create error: {}", e);
+        e.to_string()
+    })
 }
 
 #[tauri::command]
-pub fn order_update(_id: String, _data: db::Order) -> Result<db::Order, String> {
-    println!("order_update called with id: {}", _id);
-    Ok(_data)
+pub fn order_update(id: String, data: Order) -> Result<Order, String> {
+    println!("order_update called with id: {}", id);
+    let id_parsed = id.parse::<i64>().map_err(|e| e.to_string())?;
+    db::update_order(id_parsed, data).map_err(|e| {
+        println!("order_update error: {}", e);
+        e.to_string()
+    })
 }
 
 #[tauri::command]
-pub fn order_delete(_id: String) -> Result<(), String> {
-    println!("order_delete called with id: {}", _id);
-    Ok(())
+pub fn order_delete(id: String) -> Result<(), String> {
+    println!("order_delete called with id: {}", id);
+    let id_parsed = id.parse::<i64>().map_err(|e| e.to_string())?;
+    db::delete_order(id_parsed).map_err(|e| {
+        println!("order_delete error: {}", e);
+        e.to_string()
+    })
 }

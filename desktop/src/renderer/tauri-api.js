@@ -87,6 +87,11 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
         create: (data) => invoke('order_create', { data }),
         update: (id, data) => invoke('order_update', { id, data }),
         delete: (id) => invoke('order_delete', { id })
+      },
+
+      purchase: {
+        getProcessingOrders: () => invoke('get_processing_orders'),
+        getOrderItems: (orderId) => invoke('get_order_items', { orderId })
       }
     };
 
@@ -130,6 +135,11 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
       create: () => Promise.reject(new Error('Not implemented in browser')),
       update: () => Promise.reject(new Error('Not implemented in browser')),
       delete: () => Promise.reject(new Error('Not implemented in browser'))
+    },
+
+    purchase: {
+      getProcessingOrders: () => Promise.resolve([]),
+      getOrderItems: () => Promise.resolve([])
     }
   };
 
