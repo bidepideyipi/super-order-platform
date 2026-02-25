@@ -20,6 +20,36 @@ pub fn get_images_dir() -> PathBuf {
 }
 
 fn get_data_dir() -> PathBuf {
+    let exe_path = std::env::current_exe();
+    
+    match exe_path {
+        Ok(path) => {
+            let path_str = path.to_string_lossy();
+            
+            if path_str.contains(".app/Contents/") || path_str.contains("_up_") {
+                let parent = path.parent();
+                
+                if let Some(grandparent) = parent.and_then(|p| p.parent()) {
+                    let resource_dir = grandparent.join("Resources");
+                    
+                    if resource_dir.exists() {
+                        let data_dir = resource_dir.join("_up_").join("data");
+                        println!("Data directory (bundled): {:?}", data_dir);
+                        
+                        if data_dir.exists() {
+                            return data_dir;
+                        } else {
+                            println!("Bundled data directory not found: {:?}", data_dir);
+                        }
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            println!("Failed to get exe path: {}", e);
+        }
+    }
+    
     let base_dir = std::env::current_dir()
         .unwrap_or_else(|_| PathBuf::from("."));
     
@@ -28,7 +58,7 @@ fn get_data_dir() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("."))
         .join("data");
     
-    println!("Data directory: {:?}", data_dir);
+    println!("Data directory (dev): {:?}", data_dir);
     
     if !data_dir.exists() {
         fs::create_dir_all(&data_dir).unwrap_or_else(|e| {
