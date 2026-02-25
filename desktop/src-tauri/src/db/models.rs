@@ -51,8 +51,12 @@ pub struct OrderItem {
     pub sku_code: String,
     pub product_name: String,
     pub quantity: i64,
-    pub unit_price: f64,
-    pub subtotal: f64,
+    pub cost_price: f64,
+    pub sale_price: f64,
+    pub total_cost_amount: f64,
+    pub total_sale_amount: f64,
+    pub unit: String,
+    pub box_spec: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

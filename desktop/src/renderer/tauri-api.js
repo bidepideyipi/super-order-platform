@@ -91,7 +91,11 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
 
       purchase: {
         getProcessingOrders: () => invoke('get_processing_orders'),
-        getOrderItems: (orderId) => invoke('get_order_items', { orderId })
+        getOrderItems: (orderId) => invoke('get_order_items', { orderId }),
+        searchSkuByCode: (keyword) => invoke('search_sku_by_code', { keyword }),
+        createOrderItem: (data) => invoke('create_order_item', { data }),
+        updateOrderItem: (id, data) => invoke('update_order_item', { id, data }),
+        deleteOrderItem: (id) => invoke('delete_order_item', { id })
       }
     };
 

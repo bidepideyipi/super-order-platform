@@ -24,7 +24,7 @@
         style="width: 100%; margin-top: 20px;"
       >
         <el-table-column prop="order_no" label="订单编号" width="150" />
-        <el-table-column prop="customer_id" label="客户编号" width="150" />
+        <el-table-column prop="customer_id" label="客户编号" width="120" />
         <el-table-column prop="order_date" label="订单日期" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
@@ -41,6 +41,11 @@
         <el-table-column prop="total_sale_amount" label="总售价" min-width="120" align="right">
           <template #default="{ row }">
             {{ row.total_sale_amount.toFixed(2) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="total_sale_amount" label="总利润" min-width="120" align="right">
+          <template #default="{ row }">
+            {{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">

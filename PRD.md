@@ -445,15 +445,16 @@ INSERT INTO customer (customer_id, customer_name) VALUES
 ```sql
 CREATE TABLE `order` (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_no VARCHAR(20) NOT NULL UNIQUE COMMENT '订单编号 (客户ID3位+yyyyMMdd)',
-    customer_id VARCHAR(10) NOT NULL COMMENT '客户ID',
-    customer_name VARCHAR(100) COMMENT '客户名称快照',
-    order_date DATE NOT NULL COMMENT '订单日期',
+    order_no TEXT UNIQUE NOT NULL COMMENT '订单编号',
+    customer_id TEXT NOT NULL COMMENT '客户ID',
+    order_date TEXT NOT NULL COMMENT '订单日期',
     status TEXT DEFAULT 'pending' COMMENT '订单状态',
-    total_amount DECIMAL(12, 2) NOT NULL DEFAULT 0 COMMENT '订单总金额',
+    total_cost_amount REAL DEFAULT 0 COMMENT '总成本',
+    total_sale_amount REAL DEFAULT 0 COMMENT '总售价',
     remarks TEXT COMMENT '备注',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
 );
 ```
 
@@ -463,12 +464,16 @@ CREATE TABLE order_item (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER NOT NULL COMMENT '订单ID',
     sku_id INTEGER COMMENT 'SKU ID',
-    sku_code VARCHAR(6) NOT NULL COMMENT 'SKU编号',
-    product_name VARCHAR(200) NOT NULL COMMENT '产品名称快照',
-    quantity INT NOT NULL COMMENT '数量',
-    unit_price DECIMAL(10, 2) NOT NULL COMMENT '单价',
-    subtotal DECIMAL(10, 2) NOT NULL COMMENT '小计',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    sku_code TEXT NOT NULL COMMENT 'SKU编号',
+    product_name TEXT NOT NULL COMMENT '产品名称快照',
+    quantity INTEGER NOT NULL COMMENT '数量',
+    cost_price REAL NOT NULL COMMENT '成本价',
+    sale_price REAL NOT NULL COMMENT '销售价',
+    total_cost_amount REAL NOT NULL COMMENT '总成本',
+    total_sale_amount REAL NOT NULL COMMENT '总售价',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES `order`(id),
+    FOREIGN KEY (sku_id) REFERENCES sku(id)
 );
 ```
 

@@ -114,8 +114,10 @@ def init_database():
                 sku_code TEXT NOT NULL,
                 product_name TEXT NOT NULL,
                 quantity INTEGER NOT NULL,
-                unit_price REAL NOT NULL,
-                subtotal REAL NOT NULL,
+                cost_price REAL NOT NULL,
+                sale_price REAL NOT NULL,
+                total_cost_amount REAL NOT NULL,
+                total_sale_amount REAL NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (order_id) REFERENCES `order`(id),
                 FOREIGN KEY (sku_id) REFERENCES sku(id)

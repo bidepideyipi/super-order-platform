@@ -32,7 +32,11 @@ fn main() {
             commands::order_update,
             commands::order_delete,
             commands::get_processing_orders,
-            commands::get_order_items
+            commands::get_order_items,
+            commands::search_sku_by_code,
+            commands::create_order_item,
+            commands::update_order_item,
+            commands::delete_order_item
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
