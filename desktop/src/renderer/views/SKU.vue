@@ -53,10 +53,10 @@
             {{ row.sale_price.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="150" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
+            <el-button size="small" :icon="Edit" @click="handleEdit(row)" />
+            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
           </template>
         </el-table-column>
       </el-table>
@@ -92,9 +92,6 @@
               <img v-if="form.sku_code" :src="getImageUrl(form.sku_code)" class="image-preview" />
               <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
             </el-upload>
-            <el-button v-if="form.sku_code" size="small" type="danger" @click="handleRemoveImage" >
-              删除图片
-            </el-button>
           </div>
         </el-form-item>
         <el-form-item label="产品名称">
@@ -137,7 +134,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Plus } from '@element-plus/icons-vue';
+import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue';
 
 const skus = ref([]);
 const categories = ref([]);
@@ -222,15 +219,21 @@ const handleSearch = async () => {
   }
 };
 
-const handlePageChange = (page) => {
+const handlePageChange = async (page) => {
+  console.log('页码变化:', page);
   currentPage.value = page;
-  handleSearch();
+  await loadData();
 };
 
-const handleSizeChange = (size) => {
+const handleSizeChange = async (size) => {
+  console.log('每页条数变化:', size);
   pageSize.value = size;
   currentPage.value = 1;
-  handleSearch();
+  if (isSearching.value) {
+    await handleSearch();
+  } else {
+    await loadData();
+  }
 };
 
 const handleAdd = () => {
@@ -328,6 +331,7 @@ const handleSave = async () => {
       await window.tauriAPI.sku.create(skuData, imageBase64);
       ElMessage.success('新增成功');
     } else {
+      skuData.sku_code = form.value.sku_code;
       await window.tauriAPI.sku.update(String(form.value.id), skuData, imageBase64);
       ElMessage.success('更新成功');
     }
