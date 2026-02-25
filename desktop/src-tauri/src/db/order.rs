@@ -14,11 +14,11 @@ pub fn get_orders() -> Result<Vec<Order>> {
             id: Some(row.get(0)?),
             order_no: row.get(1)?,
             customer_id: row.get(2)?,
-            customer_name: row.get(10)?,
             order_date: row.get(4)?,
             status: row.get(5)?,
-            total_amount: row.get(6)?,
-            remarks: row.get(7)?,
+            total_cost_amount: row.get(6)?,
+            total_sale_amount: row.get(7)?,
+            remarks: row.get(8)?,
         })
     })?;
     

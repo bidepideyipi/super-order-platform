@@ -133,6 +133,75 @@ Tauri API 通过 IPC 机制在 Rust 后端和 Vue 前端之间通信。详细的
 - 格式：客户ID（3位）+ yyyyMMdd
 - 示例：FZC20250221、SE820250221
 
+## 打包发布
+
+### 前置要求
+
+在打包之前，需要确保：
+
+1. 已安装所有依赖：
+   ```bash
+   cd desktop
+   npm install
+   ```
+
+2. 已初始化数据库：
+   ```bash
+   python ../scripts/init_db.py
+   ```
+
+3. `desktop/data/` 目录存在且包含数据库文件和图片资源
+
+### Mac 版打包
+
+```bash
+cd desktop
+npm run tauri build -- --target universal-apple-darwin
+```
+
+打包完成后，应用将位于：
+- `desktop/src-tauri/target/universal-apple-darwin/release/bundle/dmg/`
+
+生成的文件：
+- `超级订单管理系统_1.0.0_aarch64.dmg` - ARM 架构（M1/M2/M3）
+- `超级订单管理系统_1.0.0_x64.dmg` - Intel 架构
+- `超级订单管理系统_1.0.0_universal.dmg` - 通用架构（推荐）
+
+**注意事项**：
+- 如果未安装 aarch64 target，需要先执行：
+  ```bash
+  rustup target add aarch64-apple-darwin
+  ```
+- 打包时会自动将 `desktop/data/` 目录包含到应用中
+- 数据库路径会自动适配打包后的应用路径
+
+### Windows 版打包
+
+```bash
+cd desktop
+npm run tauri build -- --target x86_64-pc-windows-msvc
+```
+
+打包完成后，应用将位于：
+- `desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/`
+
+生成的文件：
+- `超级订单管理系统_1.0.0_x64_en-US.msi` - Windows 安装包
+
+**注意事项**：
+- 需要在 Windows 系统上进行打包
+- 或者在 Mac 上安装交叉编译工具链
+
+### 通用打包命令
+
+如果不需要指定架构，可以直接运行：
+
+```bash
+npm run tauri build
+```
+
+这将根据当前系统自动打包对应平台的版本。
+
 ## 开发计划
 
 详见 [开发计划.md](./开发计划.md)

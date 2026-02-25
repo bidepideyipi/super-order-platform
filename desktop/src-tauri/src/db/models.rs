@@ -36,10 +36,10 @@ pub struct Order {
     pub id: Option<i64>,
     pub order_no: String,
     pub customer_id: String,
-    pub customer_name: String,
     pub order_date: String,
     pub status: String,
-    pub total_amount: f64,
+    pub total_cost_amount: f64,
+    pub total_sale_amount: f64,
     pub remarks: Option<String>,
 }
 

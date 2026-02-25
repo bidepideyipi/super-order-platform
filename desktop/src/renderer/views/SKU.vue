@@ -132,30 +132,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue';
+import { useSKUList } from '../composables/useSKUList';
+import { useSKUForm } from '../composables/useSKUForm';
+import { useSKUImage } from '../composables/useSKUImage';
 
-const skus = ref([]);
-const categories = ref([]);
-const searchKeyword = ref('');
+const {
+  skus,
+  categories,
+  searchKeyword,
+  currentPage,
+  pageSize,
+  total,
+  loadData: loadDataFromList,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange
+} = useSKUList();
+
+const {
+  dialogVisible,
+  dialogMode,
+  form,
+  openAddDialog,
+  openEditDialog,
+  handleSave: saveForm
+} = useSKUForm();
+
+const {
+  imageUrls,
+  getImageUrl,
+  loadImageUrls,
+  handleImageChange: handleImageUpload
+} = useSKUImage();
+
 const selectedRows = ref([]);
-const dialogVisible = ref(false);
-const dialogMode = ref('add');
-const currentPage = ref(1);
-const pageSize = ref(10);
-const total = ref(0);
-const form = ref({
-  name: '',
-  category_id: '',
-  unit: '个',
-  box_spec: '',
-  cost_price: 0,
-  sale_price: 0,
-  spec: '',
-  image_path: '',
-  image_file: null
-});
 
 const isSearching = computed(() => {
   return !!searchKeyword.value;
@@ -165,134 +178,35 @@ const filteredSKUs = computed(() => {
   return skus.value;
 });
 
-const loadImageUrls = async (skuList) => {
-  const urls = {};
-  for (const sku of skuList) {
-    if (sku.sku_code) {
-      try {
-        const result = await window.tauriAPI.sku.getImage(sku.sku_code);
-        if (result) {
-          urls[sku.sku_code] = result;
-        }
-      } catch (error) {
-        console.error('Failed to load image for', sku.sku_code, error);
-      }
-    }
-  }
-  imageUrls.value = urls;
-  return skuList;
-};
-
 const loadData = async () => {
-  try {
-    console.log('开始加载 SKU 数据，页码:', currentPage.value, '每页:', pageSize.value);
-    const [result, categoryList] = await Promise.all([
-      window.tauriAPI.sku.listPaginated(currentPage.value, pageSize.value),
-      window.tauriAPI.category.list()
-    ]);
-    console.log('SKU 数据加载完成:', result.data.length, '个 SKU');
-    console.log('总记录数:', result.total, '总页数:', result.total_pages);
-    console.log('分类数据加载完成:', categoryList.length, '个分类');
-    
-    skus.value = await loadImageUrls(result.data);
-    total.value = result.total;
-    categories.value = categoryList;
-  } catch (error) {
-    console.error('加载数据失败:', error);
-    ElMessage.error('加载数据失败: ' + (error.message || error));
-  }
+  const data = await loadDataFromList();
+  await loadImageUrls(data);
 };
 
-const handleSearch = async () => {
-  currentPage.value = 1;
-  if (searchKeyword.value) {
-    try {
-      const result = await window.tauriAPI.sku.searchPaginated(searchKeyword.value, currentPage.value, pageSize.value);
-      skus.value = await loadImageUrls(result.data);
-      total.value = result.total;
-    } catch (error) {
-      console.error('搜索失败:', error);
-      ElMessage.error('搜索失败: ' + (error.message || error));
-    }
-  } else {
-    loadData();
-  }
+const handleSearchWithImages = async () => {
+  const data = await handleSearch();
+  await loadImageUrls(data);
 };
 
-const handlePageChange = async (page) => {
-  console.log('页码变化:', page);
-  currentPage.value = page;
-  await loadData();
+const handlePageChangeWithImages = async (page) => {
+  const data = await handlePageChange(page);
+  await loadImageUrls(data);
 };
 
-const handleSizeChange = async (size) => {
-  console.log('每页条数变化:', size);
-  pageSize.value = size;
-  currentPage.value = 1;
-  if (isSearching.value) {
-    await handleSearch();
-  } else {
-    await loadData();
-  }
+const handleSizeChangeWithImages = async (size) => {
+  const data = await handleSizeChange(size);
+  await loadImageUrls(data);
 };
 
 const handleAdd = () => {
-  dialogMode.value = 'add';
-  form.value = {
-    name: '',
-    category_id: '',
-    unit: '个',
-    box_spec: '',
-    cost_price: 0,
-    sale_price: 0,
-    spec: '',
-    image_path: ''
-  };
-  dialogVisible.value = true;
+  openAddDialog();
 };
 
 const handleEdit = async (row) => {
-  dialogMode.value = 'edit';
-  form.value = { ...row };
-  
-  if (row.sku_code && !imageUrls.value[row.sku_code]) {
-    try {
-      const result = await window.tauriAPI.sku.getImage(row.sku_code);
-      if (result) {
-        imageUrls.value[row.sku_code] = result;
-      }
-    } catch (error) {
-      console.error('Failed to load image for edit:', error);
-    }
+  if (row.sku_code) {
+    await loadImageUrls([row]);
   }
-  
-  dialogVisible.value = true;
-};
-
-const imageUrls = ref({});
-
-const getImageUrl = (skuCode) => {
-  if (!skuCode) return '';
-  return imageUrls.value[skuCode] || '';
-};
-
-const handleImageChange = async (file) => {
-  try {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      const base64Data = dataUrl.split(',')[1];
-      form.value.image_file = base64Data;
-    };
-    reader.readAsDataURL(file.raw);
-  } catch (error) {
-    console.error('Image upload error:', error);
-    ElMessage.error('图片上传失败');
-  }
-};
-
-const handleRemoveImage = () => {
-  form.value.image_path = '';
+  openEditDialog(row);
 };
 
 const handleDelete = async (id) => {
@@ -305,7 +219,7 @@ const handleDelete = async (id) => {
     
     await window.tauriAPI.sku.delete(String(id));
     ElMessage.success('删除成功');
-    handleSearch();
+    await handleSearchWithImages();
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败');
@@ -315,32 +229,12 @@ const handleDelete = async (id) => {
 };
 
 const handleSave = async () => {
-  try {
-    const imageBase64 = form.value.image_file || null;
-    const skuData = {
-      name: form.value.name,
-      category_id: form.value.category_id,
-      unit: form.value.unit,
-      spec: form.value.spec,
-      box_spec: form.value.box_spec,
-      cost_price: form.value.cost_price,
-      sale_price: form.value.sale_price
-    };
-    
-    if (dialogMode.value === 'add') {
-      await window.tauriAPI.sku.create(skuData, imageBase64);
-      ElMessage.success('新增成功');
-    } else {
-      skuData.sku_code = form.value.sku_code;
-      await window.tauriAPI.sku.update(String(form.value.id), skuData, imageBase64);
-      ElMessage.success('更新成功');
-    }
-    dialogVisible.value = false;
-    handleSearch();
-  } catch (error) {
-    ElMessage.error('保存失败');
-    console.error(error);
-  }
+  await saveForm(() => handleSearchWithImages());
+};
+
+const handleImageChange = async (file) => {
+  const base64Data = await handleImageUpload(file);
+  form.value.image_file = base64Data;
 };
 
 const handleSelectionChange = (selection) => {

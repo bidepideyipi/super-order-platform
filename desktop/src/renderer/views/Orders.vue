@@ -8,14 +8,23 @@
         </div>
       </template>
       
+      <div class="toolbar">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索订单编号或客户编号"
+          @input="handleSearch"
+          style="width: 300px;"
+        />
+      </div>
+      
       <el-table
-        :data="orders"
+        :data="paginatedOrders"
         border
         stripe
-        style="width: 100%"
+        style="width: 100%; margin-top: 20px;"
       >
         <el-table-column prop="order_no" label="订单编号" width="150" />
-        <el-table-column prop="customer_name" label="客户名称" width="150" />
+        <el-table-column prop="customer_id" label="客户编号" width="150" />
         <el-table-column prop="order_date" label="订单日期" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
@@ -24,9 +33,14 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="total_amount" label="总金额" width="120" align="right">
+        <el-table-column prop="total_cost_amount" label="总成本" width="120" align="right">
           <template #default="{ row }">
-            {{ row.total_amount.toFixed(2) }}
+            {{ row.total_cost_amount.toFixed(2) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="total_sale_amount" label="总售价" width="120" align="right">
+          <template #default="{ row }">
+            {{ row.total_sale_amount.toFixed(2) }}
           </template>
         </el-table-column>
         <el-table-column prop="remarks" label="备注" min-width="200" />
@@ -38,63 +52,155 @@
           </template>
         </el-table-column>
       </el-table>
+      
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
     </el-card>
+    
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'view' ? '查看订单' : (dialogMode === 'add' ? '新增订单' : '编辑订单')"
+      width="600px"
+    >
+      <el-form :model="form" label-width="100px" :disabled="dialogMode === 'view'">
+        <el-form-item label="订单编号">
+          <el-input v-model="form.order_no" placeholder="客户编号(3)+订单日期(yyyyMMdd)" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="客户编号">
+          <el-select v-model="form.customer_id" placeholder="请选择客户" :disabled="dialogMode === 'view'">
+            <el-option
+              v-for="customer in customers"
+              :key="customer.customer_id"
+              :label="customer.customer_name"
+              :value="customer.customer_id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="订单日期">
+          <el-date-picker
+            v-model="form.order_date"
+            type="date"
+            placeholder="选择日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            :disabled="dialogMode === 'view'"
+          />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="form.status" placeholder="请选择状态" :disabled="dialogMode === 'view'">
+            <el-option
+              v-for="option in statusOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="form.remarks" type="textarea" :rows="3" placeholder="请输入备注" :disabled="dialogMode === 'view'" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSave" v-if="dialogMode !== 'view'">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, computed, onMounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useOrderList } from '../composables/useOrderList';
+import { useOrderForm } from '../composables/useOrderForm';
+import { useOrderStatus } from '../composables/useOrderStatus';
 
-const orders = ref([]);
+const {
+  orders,
+  searchKeyword,
+  currentPage,
+  pageSize,
+  total,
+  loadData,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange,
+  getPaginatedOrders
+} = useOrderList();
 
-const getStatusType = (status) => {
-  const types = {
-    'pending': 'warning',
-    'processing': 'primary',
-    'completed': 'success',
-    'cancelled': 'danger'
-  };
-  return types[status] || 'info';
-};
+const {
+  dialogVisible,
+  dialogMode,
+  form,
+  openAddDialog,
+  openEditDialog,
+  openViewDialog,
+  handleSave
+} = useOrderForm();
 
-const getStatusText = (status) => {
-  const texts = {
-    'pending': '待处理',
-    'processing': '处理中',
-    'completed': '已完成',
-    'cancelled': '已取消'
-  };
-  return texts[status] || status;
-};
+const {
+  getStatusType,
+  getStatusText,
+  statusOptions
+} = useOrderStatus();
 
-const loadData = async () => {
+const customers = ref([]);
+
+const paginatedOrders = computed(() => {
+  return getPaginatedOrders();
+});
+
+const loadCustomers = async () => {
   try {
-    orders.value = await window.tauriAPI.order.list();
+    customers.value = await window.tauriAPI.customer.list();
   } catch (error) {
-    ElMessage.error('加载订单失败');
-    console.error(error);
+    console.error('加载客户列表失败:', error);
   }
 };
 
 const handleAdd = () => {
-  ElMessage.info('新增订单功能开发中');
+  openAddDialog();
 };
 
 const handleView = (row) => {
-  ElMessage.info('查看订单详情功能开发中');
+  openViewDialog(row);
 };
 
 const handleEdit = (row) => {
-  ElMessage.info('编辑订单功能开发中');
+  openEditDialog(row);
 };
 
 const handleDelete = async (id) => {
-  ElMessage.info('删除订单功能开发中');
+  try {
+    await ElMessageBox.confirm('确定要删除该订单吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+    
+    await window.tauriAPI.order.delete(String(id));
+    ElMessage.success('删除成功');
+    await loadData();
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败');
+      console.error(error);
+    }
+  }
 };
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadCustomers();
+  await loadData();
 });
 </script>
 
@@ -107,5 +213,16 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
