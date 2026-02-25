@@ -23,6 +23,7 @@ fn main() {
             commands::sku_search,
             commands::sku_search_paginated,
             commands::sku_search_with_category,
+            commands::sku_get_image,
             commands::category_list,
             commands::customer_list,
             commands::order_list,

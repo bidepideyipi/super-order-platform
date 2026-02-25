@@ -168,7 +168,21 @@ const filteredSKUs = computed(() => {
   return skus.value;
 });
 
-const loadImageUrls = (skuList) => {
+const loadImageUrls = async (skuList) => {
+  const urls = {};
+  for (const sku of skuList) {
+    if (sku.sku_code) {
+      try {
+        const result = await window.tauriAPI.sku.getImage(sku.sku_code);
+        if (result) {
+          urls[sku.sku_code] = result;
+        }
+      } catch (error) {
+        console.error('Failed to load image for', sku.sku_code, error);
+      }
+    }
+  }
+  imageUrls.value = urls;
   return skuList;
 };
 
@@ -234,15 +248,29 @@ const handleAdd = () => {
   dialogVisible.value = true;
 };
 
-const handleEdit = (row) => {
+const handleEdit = async (row) => {
   dialogMode.value = 'edit';
   form.value = { ...row };
+  
+  if (row.sku_code && !imageUrls.value[row.sku_code]) {
+    try {
+      const result = await window.tauriAPI.sku.getImage(row.sku_code);
+      if (result) {
+        imageUrls.value[row.sku_code] = result;
+      }
+    } catch (error) {
+      console.error('Failed to load image for edit:', error);
+    }
+  }
+  
   dialogVisible.value = true;
 };
 
+const imageUrls = ref({});
+
 const getImageUrl = (skuCode) => {
   if (!skuCode) return '';
-  return `/images/sku/${skuCode}.jpeg`;
+  return imageUrls.value[skuCode] || '';
 };
 
 const handleImageChange = async (file) => {

@@ -55,6 +55,7 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
           return invoke('sku_list_paginated', { page, pageSize });
         },
         get: (id) => invoke('sku_get', { id }),
+        getImage: (skuCode) => invoke('sku_get_image', { skuCode }),
         create: (data, imageBase64) => {
           console.log('create 调用，参数:', { data, imageBase64 });
           return invoke('sku_create', { data, imageBase64 });
@@ -106,6 +107,7 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
       list: () => Promise.resolve([]),
       listPaginated: () => Promise.resolve({ data: [], total: 0, total_pages: 0 }),
       get: () => Promise.resolve(null),
+      getImage: () => Promise.resolve(null),
       create: () => Promise.reject(new Error('Not implemented in browser')),
       update: () => Promise.reject(new Error('Not implemented in browser')),
       delete: () => Promise.reject(new Error('Not implemented in browser')),

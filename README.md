@@ -51,9 +51,8 @@ python ../scripts/init_db.py
 确保当前工作目录在 `desktop/` 下，然后执行：
 
 ```bash
-cd desktop
-npm run tauri
-npx tauri dev
+cd /Users/anthony/Documents/github/super-order/desktop
+npm run tauri dev
 ```
 
 **注意**：必须使用 `npx tauri dev` 而不是 `npm run tauri`，因为 `tauri` 命令可能不在系统 PATH 中。

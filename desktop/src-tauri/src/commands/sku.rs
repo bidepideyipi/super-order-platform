@@ -1,24 +1,5 @@
 use crate::db;
-
-#[tauri::command]
-pub fn get_version() -> String {
-    "1.0.0".to_string()
-}
-
-#[tauri::command]
-pub async fn open_file() -> Result<Vec<String>, String> {
-    Ok(vec![])
-}
-
-#[tauri::command]
-pub async fn save_file(_default_name: String) -> Result<Option<String>, String> {
-    Ok(None)
-}
-
-#[tauri::command]
-pub async fn open_external(_url: String) -> Result<(), String> {
-    Ok(())
-}
+use base64::Engine;
 
 #[tauri::command]
 pub fn sku_list() -> Result<Vec<db::SKU>, String> {
@@ -57,8 +38,9 @@ pub fn sku_get(_id: String) -> Result<Option<db::SKU>, String> {
 }
 
 #[tauri::command]
-pub fn sku_create(data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
+pub fn sku_create(mut data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
     println!("sku_create called");
+    data.is_deleted = false;
     match db::create_sku(data, image_base64) {
         Ok(sku) => {
             println!("sku_create success: {} with sku_code {:?}", sku.name, sku.sku_code);
@@ -72,8 +54,9 @@ pub fn sku_create(data: db::SKU, image_base64: Option<String>) -> Result<db::SKU
 }
 
 #[tauri::command]
-pub fn sku_update(id: String, data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
+pub fn sku_update(id: String, mut data: db::SKU, image_base64: Option<String>) -> Result<db::SKU, String> {
     println!("sku_update called with id: {}", id);
+    data.is_deleted = false;
     match db::update_sku(id.parse::<i64>().unwrap_or(0), data, image_base64) {
         Ok(sku) => {
             println!("sku_update success: {} with sku_code {:?}", sku.name, sku.sku_code);
@@ -120,52 +103,35 @@ pub fn sku_search_with_category(keyword: String, category_id: Option<String>) ->
 }
 
 #[tauri::command]
-pub fn category_list() -> Result<Vec<db::Category>, String> {
-    println!("category_list called");
-    db::get_categories().map_err(|e| {
-        println!("category_list error: {}", e);
-        e.to_string()
-    })
-}
-
-#[tauri::command]
-pub fn customer_list() -> Result<Vec<db::Customer>, String> {
-    println!("customer_list called");
-    db::get_customers().map_err(|e| {
-        println!("customer_list error: {}", e);
-        e.to_string()
-    })
-}
-
-#[tauri::command]
-pub fn order_list() -> Result<Vec<db::Order>, String> {
-    println!("order_list called");
-    db::get_orders().map_err(|e| {
-        println!("order_list error: {}", e);
-        e.to_string()
-    })
-}
-
-#[tauri::command]
-pub fn order_get(_id: String) -> Result<Option<db::Order>, String> {
-    println!("order_get called with id: {}", _id);
+pub fn sku_get_image(sku_code: String) -> Result<Option<String>, String> {
+    println!("sku_get_image called for sku_code: {}", sku_code);
+    
+    let images_dir = db::get_images_dir();
+    let image_path = images_dir.join(&sku_code);
+    
+    let extensions = vec!["jpeg", "jpg", "png"];
+    for ext in extensions {
+        let path_with_ext = image_path.with_extension(ext);
+        if path_with_ext.exists() {
+            println!("Found image: {:?}", path_with_ext);
+            match std::fs::read(&path_with_ext) {
+                Ok(image_data) => {
+                    let base64_string = base64::prelude::BASE64_STANDARD.encode(&image_data);
+                    let mime_type = match ext {
+                        "jpeg" | "jpg" => "image/jpeg",
+                        "png" => "image/png",
+                        _ => "image/jpeg",
+                    };
+                    return Ok(Some(format!("data:{};base64,{}", mime_type, base64_string)));
+                }
+                Err(e) => {
+                    println!("Failed to read image: {}", e);
+                    return Err(format!("Failed to read image: {}", e));
+                }
+            }
+        }
+    }
+    
+    println!("Image not found for sku_code: {}", sku_code);
     Ok(None)
-}
-
-#[tauri::command]
-pub fn order_create(_data: db::Order) -> Result<db::Order, String> {
-    println!("order_create called");
-    Ok(_data)
-}
-
-#[tauri::command]
-pub fn order_update(_id: String, _data: db::Order) -> Result<db::Order, String> {
-    println!("order_update called with id: {}", _id);
-    Ok(_data)
-}
-
-#[tauri::command]
-pub fn order_delete(_id: String) -> Result<(), String> {
-    println!("order_delete called with id: {}", _id);
-    Ok(())
 }
