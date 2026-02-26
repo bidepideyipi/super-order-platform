@@ -6,7 +6,8 @@ pub fn get_order_items_by_order_id(order_id: i64) -> Result<Vec<OrderItem>> {
     let mut stmt = conn.prepare(
         "SELECT oi.id, oi.order_id, oi.sku_id, oi.sku_code, oi.product_name, oi.quantity, 
                 oi.cost_price, oi.sale_price, oi.total_cost_amount, oi.total_sale_amount,
-                COALESCE(s.unit, '') as unit, COALESCE(s.box_spec, '') as box_spec
+                COALESCE(s.unit, '') as unit, COALESCE(s.box_spec, '') as box_spec,
+                COALESCE(s.box_quantity, 1) as box_quantity
          FROM order_item oi
          LEFT JOIN sku s ON oi.sku_id = s.id
          WHERE oi.order_id = ?1 
@@ -26,6 +27,7 @@ pub fn get_order_items_by_order_id(order_id: i64) -> Result<Vec<OrderItem>> {
             total_sale_amount: row.get(9)?,
             unit: row.get(10)?,
             box_spec: row.get(11)?,
+            box_quantity: row.get(12)?,
         })
     })?;
     

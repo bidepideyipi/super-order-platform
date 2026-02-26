@@ -3,11 +3,12 @@
     <el-card>
       <template #header>
         <div class="header-content">
-          <span>采购管理</span>
-          <div class="header-actions">
-            <el-button type="primary" @click="handleAdd" :disabled="!selectedOrderId">新增明细</el-button>
+            <span>采购管理</span>
+            <div class="header-actions">
+              <el-button @click="exportExcel" :disabled="!selectedOrderId || orderItems.length === 0">导出Excel</el-button>
+              <el-button type="primary" @click="handleAdd" :disabled="!selectedOrderId">新增明细</el-button>
+            </div>
           </div>
-        </div>
       </template>
       
       <div class="toolbar">
@@ -41,35 +42,37 @@
               <span v-else>-</span>
               <div>
                 <div>{{ row.product_name }}</div>
-                <div style="color: #999; font-size: 12px;">({{ row.sku_code }})</div>
+                <div style="color: #999; font-size: 12px;">{{ row.sku_code }}</div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="单位/箱规" width="120">
+         <el-table-column label="每(单位)N件" width="200">
           <template #default="{ row }">
-            {{ row.unit }} / {{ row.box_spec || '无' }}
+            <div v-if="row.box_quantity > 1">每{{ row.unit }}{{ row.box_spec }}</div>
+            <div v-else>{{ row.unit }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="quantity" label="数量" width="100" align="right" />
-        <el-table-column prop="cost_price" label="成本价" width="100" align="right">
+         <el-table-column label="数量" width="100" align="right">
           <template #default="{ row }">
-            {{ row.cost_price.toFixed(2) }}
+            <div>{{ row.quantity}}{{ row.unit }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="sale_price" label="销售价" width="100" align="right">
+        <el-table-column label="成本价/销售价" width="100" align="right">
           <template #default="{ row }">
-            {{ row.sale_price.toFixed(2) }}
+            <div style="color: #67C23A;">¥{{ row.cost_price.toFixed(2) }}</div>
+            <div style="color: #409EFF;">¥{{ row.sale_price.toFixed(2) }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="total_cost_amount" label="总成本" width="100" align="right">
+        <el-table-column label="总成本/总售价" width="100" align="right">
           <template #default="{ row }">
-            {{ row.total_cost_amount.toFixed(2) }}
+            <div style="color: #67C23A;">¥{{ row.total_cost_amount.toFixed(2) }}</div>
+            <div style="color: #409EFF;">¥{{ row.total_sale_amount.toFixed(2) }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="total_sale_amount" label="总售价" width="100" align="right">
+        <el-table-column label="利润" width="100" align="right">
           <template #default="{ row }">
-            {{ row.total_sale_amount.toFixed(2) }}
+            <div>¥{{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}</div>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right" align="center">
@@ -116,6 +119,9 @@
         <el-form-item label="销售价">
           <el-input-number v-model="form.sale_price" :precision="2" :min="0" />
         </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="form.sync_to_sku">同步到SKU</el-checkbox>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -129,6 +135,7 @@
 import { ElMessageBox } from 'element-plus';
 import { usePurchaseList } from '../composables/usePurchaseList';
 import { usePurchaseForm } from '../composables/usePurchaseForm';
+import { usePurchaseExport } from '../composables/usePurchaseExport';
 import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue';
 
 const {
@@ -142,6 +149,12 @@ const {
   handleOrderChange,
   refreshOrderItems
 } = usePurchaseList();
+
+const { exportExcel } = usePurchaseExport({
+  processingOrders,
+  selectedOrderId,
+  orderItems
+});
 
 const {
   dialogVisible,
@@ -190,6 +203,8 @@ const handleDelete = async (id) => {
     }
   }
 };
+
+
 
 loadProcessingOrders();
 </script>

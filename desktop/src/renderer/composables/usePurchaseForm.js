@@ -20,17 +20,19 @@ export function usePurchaseForm() {
     total_cost_amount: 0,
     total_sale_amount: 0,
     unit: '',
-    box_spec: ''
+    box_spec: '',
+    box_quantity: 1,
+    sync_to_sku: true
   };
 
   const form = ref({ ...defaultForm });
 
   const calculateTotals = () => {
-    form.value.total_cost_amount = form.value.quantity * form.value.cost_price;
-    form.value.total_sale_amount = form.value.quantity * form.value.sale_price;
+    form.value.total_cost_amount = form.value.quantity * form.value.cost_price * form.value.box_quantity;
+    form.value.total_sale_amount = form.value.quantity * form.value.sale_price * form.value.box_quantity;
   };
 
-  watch(() => [form.value.quantity, form.value.cost_price, form.value.sale_price], calculateTotals);
+  watch(() => [form.value.quantity, form.value.cost_price, form.value.sale_price, form.value.box_quantity], calculateTotals);
 
   const searchSku = async (queryString, cb) => {
     if (!queryString) {
@@ -57,6 +59,7 @@ export function usePurchaseForm() {
     form.value.sale_price = item.sale_price;
     form.value.unit = item.unit;
     form.value.box_spec = item.box_spec;
+    form.value.box_quantity = item.box_quantity;
     calculateTotals();
   };
 
@@ -72,10 +75,22 @@ export function usePurchaseForm() {
     dialogVisible.value = true;
   };
 
-  const openEditDialog = (row) => {
+  const openEditDialog = async (row) => {
     dialogMode.value = 'edit';
-    form.value = { ...row };
+    form.value = { ...row, sync_to_sku: true };
     skuSearchKeyword.value = row.sku_code;
+    
+    if (row.sku_id) {
+      try {
+        const sku = await window.tauriAPI.sku.get(String(row.sku_id));
+        if (sku) {
+          selectedSku.value = sku;
+        }
+      } catch (error) {
+        console.error('加载SKU失败:', error);
+      }
+    }
+    
     dialogVisible.value = true;
   };
 
@@ -94,6 +109,27 @@ export function usePurchaseForm() {
       } else {
         await window.tauriAPI.purchase.updateOrderItem(String(form.value.id), form.value);
         ElMessage.success('更新成功');
+      }
+
+      if (form.value.sync_to_sku && form.value.sku_id) {
+        try {
+          const skuData = {
+            sku_code: form.value.sku_code,
+            name: selectedSku.value?.name || form.value.product_name,
+            category_id: selectedSku.value?.category_id || '01',
+            unit: selectedSku.value?.unit || form.value.unit,
+            spec: selectedSku.value?.spec,
+            box_spec: selectedSku.value?.box_spec || form.value.box_spec,
+            box_quantity: selectedSku.value?.box_quantity || form.value.box_quantity,
+            cost_price: form.value.cost_price,
+            sale_price: form.value.sale_price
+          };
+          await window.tauriAPI.sku.update(String(form.value.sku_id), skuData, null);
+          ElMessage.success('已同步到SKU');
+        } catch (error) {
+          console.error('同步SKU失败:', error);
+          ElMessage.warning('保存成功，但同步到SKU失败');
+        }
       }
 
       dialogVisible.value = false;

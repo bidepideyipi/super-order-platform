@@ -32,18 +32,25 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="category_name" label="分类" width="120" />
-        <el-table-column prop="sku_code" label="SKU编号" width="100" />
-        <el-table-column label="产品图片" width="100" align="center">
+        <el-table-column prop="category_name" label="分类" width="100" />
+        <el-table-column label="商品信息" min-width="250">
           <template #default="{ row }">
-            <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 32px; height: 32px; object-fit: cover;" />
-            <span v-else>-</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 32px; height: 32px; object-fit: cover;" />
+              <span v-else>-</span>
+              <div>
+                <div>{{ row.name }}</div>
+                <div style="color: #999; font-size: 12px;">{{ row.sku_code }}</div>
+              </div>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="产品名称" min-width="200" />
-        <el-table-column prop="unit" label="单位" width="80" />
-        <el-table-column prop="box_spec" label="箱规" width="160" />
-        <el-table-column prop="box_quantity" label="每箱数量" width="100" align="right" />
+        <el-table-column label="每(单位)N件" width="200">
+          <template #default="{ row }">
+            <div v-if="row.box_quantity > 1">每{{ row.unit }}{{ row.box_spec }}</div>
+            <div v-else>{{ row.unit }}</div>
+          </template>
+        </el-table-column>
         <el-table-column prop="cost_price" label="成本价" width="100" align="right">
           <template #default="{ row }">
             {{ row.cost_price.toFixed(2) }}
@@ -54,7 +61,7 @@
             {{ row.sale_price.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right" align="center">
+        <el-table-column label="操作" width="200" fixed="right" align="center">
           <template #default="{ row }">
             <el-button size="small" :icon="Edit" @click="handleEdit(row)" />
             <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
@@ -109,7 +116,8 @@
           </el-select>
         </el-form-item>
         <el-form-item label="单位">
-          <el-input v-model="form.unit" placeholder="请输入单位" />
+          <el-input v-if="form.box_quantity <= 1" v-model="form.unit" placeholder="请输入单位" />
+          <span v-else>箱</span>
         </el-form-item>
         <el-form-item label="规格">
           <el-input v-model="form.spec" placeholder="请输入规格" />
@@ -136,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue';
 import { useSKUList } from '../composables/useSKUList';
@@ -164,6 +172,12 @@ const {
   openEditDialog,
   handleSave: saveForm
 } = useSKUForm();
+
+watch(() => form.value.box_quantity, (newVal) => {
+  if (newVal > 1) {
+    form.value.unit = '箱';
+  }
+});
 
 const {
   imageUrls,
