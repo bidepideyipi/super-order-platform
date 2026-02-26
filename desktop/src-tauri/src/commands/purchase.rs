@@ -7,9 +7,9 @@ pub fn get_processing_orders() -> Result<Vec<Order>, String> {
     let rusqlite_conn = rusqlite::Connection::open(conn).map_err(|e| e.to_string())?;
     
     let mut stmt = rusqlite_conn.prepare(
-        "SELECT o.*, c.customer_name 
+        "SELECT o.id, o.order_no, o.customer_id, o.order_date, o.status, o.is_settled, 
+                o.total_cost_amount, o.total_sale_amount, o.remarks
          FROM `order` o 
-         LEFT JOIN customer c ON o.customer_id = c.customer_id 
          WHERE o.status = 'processing'
          ORDER BY o.created_at DESC"
     ).map_err(|e| e.to_string())?;
@@ -21,9 +21,10 @@ pub fn get_processing_orders() -> Result<Vec<Order>, String> {
             customer_id: row.get(2)?,
             order_date: row.get(3)?,
             status: row.get(4)?,
-            total_cost_amount: row.get(5)?,
-            total_sale_amount: row.get(6)?,
-            remarks: row.get(7)?,
+            is_settled: row.get::<_, i32>(5)? != 0,
+            total_cost_amount: row.get(6)?,
+            total_sale_amount: row.get(7)?,
+            remarks: row.get(8)?,
         })
     }).map_err(|e| e.to_string())?;
     
@@ -53,7 +54,7 @@ pub fn search_sku_by_code(keyword: String) -> Result<Vec<SKU>, String> {
     let pattern = format!("%{}%", keyword);
     let mut stmt = rusqlite_conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE s.sku_code LIKE ?1 AND s.is_deleted = 0
@@ -69,11 +70,12 @@ pub fn search_sku_by_code(keyword: String) -> Result<Vec<SKU>, String> {
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     }).map_err(|e| e.to_string())?;
     

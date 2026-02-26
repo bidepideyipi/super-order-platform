@@ -7,7 +7,7 @@ pub fn get_all_skus() -> Result<Vec<SKU>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE s.is_deleted = 0
@@ -22,11 +22,12 @@ pub fn get_all_skus() -> Result<Vec<SKU>> {
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     })?;
     
@@ -55,7 +56,7 @@ pub fn get_skus_paginated(page: usize, page_size: usize) -> Result<PaginatedResu
     
     let mut stmt = conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE s.is_deleted = 0
@@ -72,11 +73,12 @@ pub fn get_skus_paginated(page: usize, page_size: usize) -> Result<PaginatedResu
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     })?;
     
@@ -98,7 +100,7 @@ pub fn search_skus(keyword: &str) -> Result<Vec<SKU>> {
     
     let mut stmt = conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE (s.sku_code LIKE ?1 OR s.name LIKE ?1) AND s.is_deleted = 0
@@ -114,11 +116,12 @@ pub fn search_skus(keyword: &str) -> Result<Vec<SKU>> {
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     })?;
     
@@ -149,7 +152,7 @@ pub fn search_skus_paginated(keyword: &str, page: usize, page_size: usize) -> Re
     
     let mut stmt = conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE (s.sku_code LIKE ?1 OR s.name LIKE ?1) AND s.is_deleted = 0
@@ -168,11 +171,12 @@ pub fn search_skus_paginated(keyword: &str, page: usize, page_size: usize) -> Re
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     })?;
     
@@ -192,7 +196,7 @@ pub fn filter_skus_by_category(category_id: &str) -> Result<Vec<SKU>> {
     
     let mut stmt = conn.prepare(
         "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
          WHERE s.category_id = ?1 AND s.is_deleted = 0
@@ -208,11 +212,12 @@ pub fn filter_skus_by_category(category_id: &str) -> Result<Vec<SKU>> {
             spec: row.get(4)?,
             unit: row.get(5)?,
             category_id: row.get(6)?,
-            category_name: row.get(11)?,
+            category_name: row.get(12)?,
             box_spec: row.get(7)?,
-            cost_price: row.get(8)?,
-            sale_price: row.get(9)?,
-            is_deleted: row.get::<_, i32>(10)? != 0,
+            box_quantity: row.get(8)?,
+            cost_price: row.get(9)?,
+            sale_price: row.get(10)?,
+            is_deleted: row.get::<_, i32>(11)? != 0,
         })
     })?;
     
@@ -234,7 +239,7 @@ pub fn search_skus_by_keyword_and_category(keyword: &str, category_id: Option<&s
     if let Some(cat_id) = category_id {
         let mut stmt = conn.prepare(
             "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                    s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                    s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
              FROM sku s 
              LEFT JOIN sku_category c ON s.category_id = c.category_id 
              WHERE (s.sku_code LIKE ?1 OR s.name LIKE ?1) AND s.category_id = ?2 AND s.is_deleted = 0
@@ -249,18 +254,19 @@ pub fn search_skus_by_keyword_and_category(keyword: &str, category_id: Option<&s
                 spec: row.get(4)?,
                 unit: row.get(5)?,
                 category_id: row.get(6)?,
-                category_name: row.get(11)?,
+                category_name: row.get(12)?,
                 box_spec: row.get(7)?,
-                cost_price: row.get(8)?,
-                sale_price: row.get(9)?,
-                is_deleted: row.get::<_, i32>(10)? != 0,
+                box_quantity: row.get(8)?,
+                cost_price: row.get(9)?,
+                sale_price: row.get(10)?,
+                is_deleted: row.get::<_, i32>(11)? != 0,
             })
         })?;
         skus.collect()
     } else {
         let mut stmt = conn.prepare(
             "SELECT s.id, s.sku_code, s.name, s.description, s.spec, s.unit, s.category_id, 
-                    s.box_spec, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
+                    s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
              FROM sku s 
              LEFT JOIN sku_category c ON s.category_id = c.category_id 
              WHERE (s.sku_code LIKE ?1 OR s.name LIKE ?1) AND s.is_deleted = 0
@@ -275,11 +281,12 @@ pub fn search_skus_by_keyword_and_category(keyword: &str, category_id: Option<&s
                 spec: row.get(4)?,
                 unit: row.get(5)?,
                 category_id: row.get(6)?,
-                category_name: row.get(11)?,
+                category_name: row.get(12)?,
                 box_spec: row.get(7)?,
-                cost_price: row.get(8)?,
-                sale_price: row.get(9)?,
-                is_deleted: row.get::<_, i32>(10)? != 0,
+                box_quantity: row.get(8)?,
+                cost_price: row.get(9)?,
+                sale_price: row.get(10)?,
+                is_deleted: row.get::<_, i32>(11)? != 0,
             })
         })?;
         skus.collect()
@@ -310,8 +317,8 @@ pub fn create_sku(mut sku: SKU, image_base64: Option<String>) -> Result<SKU> {
     sku.sku_code = Some(sku_code.clone());
     
     conn.execute(
-        "INSERT INTO sku (sku_code, name, description, spec, unit, category_id, box_spec, cost_price, sale_price, is_deleted)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 0)",
+        "INSERT INTO sku (sku_code, name, description, spec, unit, category_id, box_spec, box_quantity, cost_price, sale_price, is_deleted)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, 0)",
         [
             &sku.sku_code as &dyn rusqlite::ToSql,
             &sku.name as &dyn rusqlite::ToSql,
@@ -320,6 +327,7 @@ pub fn create_sku(mut sku: SKU, image_base64: Option<String>) -> Result<SKU> {
             &sku.unit as &dyn rusqlite::ToSql,
             &sku.category_id as &dyn rusqlite::ToSql,
             &sku.box_spec as &dyn rusqlite::ToSql,
+            &sku.box_quantity as &dyn rusqlite::ToSql,
             &sku.cost_price as &dyn rusqlite::ToSql,
             &sku.sale_price as &dyn rusqlite::ToSql,
         ],
@@ -360,8 +368,8 @@ pub fn update_sku(id: i64, mut sku: SKU, image_base64: Option<String>) -> Result
     
     conn.execute(
         "UPDATE sku SET sku_code = ?1, name = ?2, description = ?3, spec = ?4, unit = ?5, 
-         category_id = ?6, box_spec = ?7, cost_price = ?8, sale_price = ?9
-         WHERE id = ?10",
+         category_id = ?6, box_spec = ?7, box_quantity = ?8, cost_price = ?9, sale_price = ?10
+         WHERE id = ?11",
         [
             &sku.sku_code as &dyn rusqlite::ToSql,
             &sku.name as &dyn rusqlite::ToSql,
@@ -370,6 +378,7 @@ pub fn update_sku(id: i64, mut sku: SKU, image_base64: Option<String>) -> Result
             &sku.unit as &dyn rusqlite::ToSql,
             &sku.category_id as &dyn rusqlite::ToSql,
             &sku.box_spec as &dyn rusqlite::ToSql,
+            &sku.box_quantity as &dyn rusqlite::ToSql,
             &sku.cost_price as &dyn rusqlite::ToSql,
             &sku.sale_price as &dyn rusqlite::ToSql,
             &id as &dyn rusqlite::ToSql,

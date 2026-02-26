@@ -395,9 +395,9 @@ CREATE TABLE sku (
     unit VARCHAR(20) DEFAULT '个' COMMENT '单位',
     category_id VARCHAR(2) NOT NULL COMMENT '分类ID',
     box_spec VARCHAR(100) COMMENT '箱规（如：48包、136g*40包）',
+    box_quantity INTEGER DEFAULT 1 COMMENT '每箱数量，它是箱规的量化字段，代表每箱会有多少件商品',
     cost_price DECIMAL(10, 2) COMMENT '成本单价（元）',
     sale_price DECIMAL(10, 2) COMMENT '销售单价（元）',
-    image_path TEXT COMMENT 'SKU图片路径（JSON数组格式，如["images/sku/000001.jpg"]）',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -449,6 +449,7 @@ CREATE TABLE `order` (
     customer_id TEXT NOT NULL COMMENT '客户ID',
     order_date TEXT NOT NULL COMMENT '订单日期',
     status TEXT DEFAULT 'pending' COMMENT '订单状态',
+    is_settled INTEGER DEFAULT 0 COMMENT '是否结算',
     total_cost_amount REAL DEFAULT 0 COMMENT '总成本',
     total_sale_amount REAL DEFAULT 0 COMMENT '总售价',
     remarks TEXT COMMENT '备注',
@@ -492,8 +493,16 @@ CREATE TABLE user (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+#### 4.3.2 financial_transaction (财务收支表)
+```sql
+CREATE TABLE financial_transaction (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL COMMENT '分类（如：收入、支出）',
+    description TEXT COMMENT '说明',
+    amount_change REAL NOT NULL COMMENT '金额变化（正数为收入，负数为支出）',
+    balance REAL NOT NULL COMMENT '结余',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 );
 ```
 

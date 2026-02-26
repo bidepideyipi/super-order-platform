@@ -1,13 +1,12 @@
 use rusqlite::{Connection, Result};
 use crate::db::{Order, get_db_path};
-use chrono::Utc;
 
 pub fn get_orders() -> Result<Vec<Order>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare(
-        "SELECT o.*, c.customer_name 
+        "SELECT o.id, o.order_no, o.customer_id, o.order_date, o.status, o.is_settled, 
+                o.total_cost_amount, o.total_sale_amount, o.remarks
          FROM `order` o 
-         LEFT JOIN customer c ON o.customer_id = c.customer_id 
          ORDER BY o.created_at DESC"
     )?;
     let orders = stmt.query_map([], |row| {
@@ -17,9 +16,10 @@ pub fn get_orders() -> Result<Vec<Order>> {
             customer_id: row.get(2)?,
             order_date: row.get(3)?,
             status: row.get(4)?,
-            total_cost_amount: row.get(5)?,
-            total_sale_amount: row.get(6)?,
-            remarks: row.get(7)?,
+            is_settled: row.get::<_, i32>(5)? != 0,
+            total_cost_amount: row.get(6)?,
+            total_sale_amount: row.get(7)?,
+            remarks: row.get(8)?,
         })
     })?;
     
@@ -29,9 +29,9 @@ pub fn get_orders() -> Result<Vec<Order>> {
 pub fn get_order(id: i64) -> Result<Option<Order>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare(
-        "SELECT o.*, c.customer_name 
+        "SELECT o.id, o.order_no, o.customer_id, o.order_date, o.status, o.is_settled, 
+                o.total_cost_amount, o.total_sale_amount, o.remarks
          FROM `order` o 
-         LEFT JOIN customer c ON o.customer_id = c.customer_id 
          WHERE o.id = ?1"
     )?;
     
@@ -42,9 +42,10 @@ pub fn get_order(id: i64) -> Result<Option<Order>> {
             customer_id: row.get(2)?,
             order_date: row.get(3)?,
             status: row.get(4)?,
-            total_cost_amount: row.get(5)?,
-            total_sale_amount: row.get(6)?,
-            remarks: row.get(7)?,
+            is_settled: row.get::<_, i32>(5)? != 0,
+            total_cost_amount: row.get(6)?,
+            total_sale_amount: row.get(7)?,
+            remarks: row.get(8)?,
         })
     });
     
@@ -58,17 +59,18 @@ pub fn get_order(id: i64) -> Result<Option<Order>> {
 pub fn create_order(mut order: Order) -> Result<Order> {
     let conn = Connection::open(get_db_path())?;
     
-    let order_no = generate_order_no(&conn, &order.customer_id)?;
+    let order_no = generate_order_no(&order.customer_id, &order.order_date)?;
     order.order_no = Some(order_no.clone());
     
     conn.execute(
-        "INSERT INTO `order` (order_no, customer_id, order_date, status, total_cost_amount, total_sale_amount, remarks)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        "INSERT INTO `order` (order_no, customer_id, order_date, status, is_settled, total_cost_amount, total_sale_amount, remarks)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
         [
             &order_no as &dyn rusqlite::ToSql,
             &order.customer_id as &dyn rusqlite::ToSql,
             &order.order_date as &dyn rusqlite::ToSql,
             &order.status as &dyn rusqlite::ToSql,
+            &(order.is_settled as i32) as &dyn rusqlite::ToSql,
             &order.total_cost_amount as &dyn rusqlite::ToSql,
             &order.total_sale_amount as &dyn rusqlite::ToSql,
             &order.remarks as &dyn rusqlite::ToSql,
@@ -85,13 +87,14 @@ pub fn update_order(id: i64, mut order: Order) -> Result<Order> {
     
     conn.execute(
         "UPDATE `order` 
-         SET customer_id = ?1, order_date = ?2, status = ?3, 
-             total_cost_amount = ?4, total_sale_amount = ?5, remarks = ?6 
-         WHERE id = ?7",
+         SET customer_id = ?1, order_date = ?2, status = ?3, is_settled = ?4, 
+             total_cost_amount = ?5, total_sale_amount = ?6, remarks = ?7 
+         WHERE id = ?8",
         [
             &order.customer_id as &dyn rusqlite::ToSql,
             &order.order_date as &dyn rusqlite::ToSql,
             &order.status as &dyn rusqlite::ToSql,
+            &(order.is_settled as i32) as &dyn rusqlite::ToSql,
             &order.total_cost_amount as &dyn rusqlite::ToSql,
             &order.total_sale_amount as &dyn rusqlite::ToSql,
             &order.remarks as &dyn rusqlite::ToSql,
@@ -114,24 +117,8 @@ pub fn delete_order(id: i64) -> Result<()> {
     Ok(())
 }
 
-fn generate_order_no(conn: &Connection, customer_id: &str) -> Result<String> {
-    let now = Utc::now();
-    let date_str = now.format("%Y%m%d").to_string();
-    
-    let today_count: i64 = conn.query_row(
-        "SELECT COUNT(*) FROM `order` WHERE customer_id = ?1 AND DATE(order_date) = DATE('now', 'localtime')",
-        [customer_id],
-        |row| row.get(0)
-    )?;
-    
-    let customer_prefix = if customer_id.len() > 3 {
-        &customer_id[..3]
-    } else {
-        customer_id
-    };
-    
-    let _sequence = format!("{:03}", today_count + 1);
-    let order_no = format!("{}{}", customer_prefix, date_str);
-    
+fn generate_order_no(customer_id: &str, order_date: &str) -> Result<String> {
+    let formatted_date = order_date.replace("-", "");
+    let order_no = format!("{}{}", customer_id, formatted_date);
     Ok(order_no)
 }

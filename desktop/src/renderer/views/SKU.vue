@@ -43,6 +43,7 @@
         <el-table-column prop="name" label="产品名称" min-width="200" />
         <el-table-column prop="unit" label="单位" width="80" />
         <el-table-column prop="box_spec" label="箱规" width="160" />
+        <el-table-column prop="box_quantity" label="每箱数量" width="100" align="right" />
         <el-table-column prop="cost_price" label="成本价" width="100" align="right">
           <template #default="{ row }">
             {{ row.cost_price.toFixed(2) }}
@@ -115,6 +116,9 @@
         </el-form-item>
         <el-form-item label="箱规">
           <el-input v-model="form.box_spec" placeholder="请输入箱规" />
+        </el-form-item>
+        <el-form-item label="每箱数量">
+          <el-input-number v-model="form.box_quantity" :min="1" />
         </el-form-item>
         <el-form-item label="成本价">
           <el-input-number v-model="form.cost_price" :precision="2" :min="0" />

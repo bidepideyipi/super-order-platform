@@ -9,6 +9,7 @@ export function useSKUForm() {
     category_id: '',
     unit: '个',
     box_spec: '',
+    box_quantity: 1,
     cost_price: 0,
     sale_price: 0,
     spec: '',
@@ -22,6 +23,7 @@ export function useSKUForm() {
       category_id: '',
       unit: '个',
       box_spec: '',
+      box_quantity: 1,
       cost_price: 0,
       sale_price: 0,
       spec: '',
@@ -50,6 +52,7 @@ export function useSKUForm() {
         unit: form.value.unit,
         spec: form.value.spec,
         box_spec: form.value.box_spec,
+        box_quantity: form.value.box_quantity,
         cost_price: form.value.cost_price,
         sale_price: form.value.sale_price
       };

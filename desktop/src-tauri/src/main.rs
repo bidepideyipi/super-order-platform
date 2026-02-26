@@ -36,7 +36,13 @@ fn main() {
             commands::search_sku_by_code,
             commands::create_order_item,
             commands::update_order_item,
-            commands::delete_order_item
+            commands::delete_order_item,
+            commands::financial_list,
+            commands::financial_get,
+            commands::financial_create,
+            commands::financial_update,
+            commands::financial_delete,
+            commands::financial_get_balance
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

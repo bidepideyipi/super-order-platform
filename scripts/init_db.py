@@ -34,6 +34,7 @@ def init_database():
                 unit TEXT DEFAULT '个',
                 category_id TEXT NOT NULL,
                 box_spec TEXT,
+                box_quantity INTEGER DEFAULT 1,
                 cost_price REAL DEFAULT 0,
                 sale_price REAL DEFAULT 0,
                 is_deleted INTEGER DEFAULT 0,
@@ -89,6 +90,7 @@ def init_database():
                 customer_id TEXT NOT NULL,
                 order_date TEXT NOT NULL,
                 status TEXT DEFAULT 'pending',
+                is_settled INTEGER DEFAULT 0,
                 total_cost_amount REAL DEFAULT 0,
                 total_sale_amount REAL DEFAULT 0,
                 remarks TEXT,
@@ -126,6 +128,21 @@ def init_database():
         
         conn.execute(text("""
             CREATE INDEX IF NOT EXISTS idx_order_id ON order_item(order_id)
+        """))
+        
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS financial_transaction (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT NOT NULL,
+                description TEXT,
+                amount_change REAL NOT NULL,
+                balance REAL NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_created_at ON financial_transaction(created_at)
         """))
         
         conn.commit()

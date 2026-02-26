@@ -42,6 +42,14 @@ const routes = [
     }
   },
   {
+    path: '/financial',
+    name: 'Financial',
+    component: () => {
+      console.log('Loading Financial component');
+      return import('../views/Financial.vue');
+    }
+  },
+  {
     path: '/test-tauri',
     name: 'TestTauri',
     component: () => {

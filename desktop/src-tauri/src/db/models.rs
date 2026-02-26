@@ -12,6 +12,8 @@ pub struct SKU {
     pub category_name: Option<String>,
     pub box_spec: Option<String>,
     #[serde(default)]
+    pub box_quantity: i64,
+    #[serde(default)]
     pub cost_price: f64,
     #[serde(default)]
     pub sale_price: f64,
@@ -31,13 +33,15 @@ pub struct Customer {
     pub customer_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Order {
     pub id: Option<i64>,
     pub order_no: Option<String>,
     pub customer_id: String,
     pub order_date: String,
     pub status: String,
+    #[serde(default)]
+    pub is_settled: bool,
     pub total_cost_amount: f64,
     pub total_sale_amount: f64,
     pub remarks: Option<String>,
@@ -57,6 +61,16 @@ pub struct OrderItem {
     pub total_sale_amount: f64,
     pub unit: String,
     pub box_spec: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct FinancialTransaction {
+    pub id: Option<i64>,
+    pub category: String,
+    pub description: Option<String>,
+    pub amount_change: f64,
+    pub balance: f64,
+    pub created_at: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
