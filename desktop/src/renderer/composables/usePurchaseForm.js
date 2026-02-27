@@ -14,6 +14,7 @@ export function usePurchaseForm() {
     sku_id: null,
     sku_code: '',
     product_name: '',
+    spec: '',
     quantity: 1,
     cost_price: 0,
     sale_price: 0,
@@ -55,6 +56,7 @@ export function usePurchaseForm() {
     form.value.sku_id = item.id;
     form.value.sku_code = item.sku_code;
     form.value.product_name = item.name;
+    form.value.spec = item.spec;
     form.value.cost_price = item.cost_price;
     form.value.sale_price = item.sale_price;
     form.value.unit = item.unit;

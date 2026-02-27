@@ -35,10 +35,30 @@ pub fn get_order_items_by_order_id(order_id: i64) -> Result<Vec<OrderItem>> {
     items.collect()
 }
 
-pub fn create_order_item(item: OrderItem) -> Result<OrderItem> {
-    let conn = Connection::open(get_db_path())?;
-    
+fn update_order_totals(conn: &Connection, order_id: i64) -> Result<()> {
     conn.execute(
+        "UPDATE `order` 
+         SET total_cost_amount = (
+             SELECT COALESCE(SUM(total_cost_amount), 0) 
+             FROM order_item 
+             WHERE order_id = ?1
+         ),
+         total_sale_amount = (
+             SELECT COALESCE(SUM(total_sale_amount), 0) 
+             FROM order_item 
+             WHERE order_id = ?1
+         )
+         WHERE id = ?1",
+        [order_id],
+    )?;
+    Ok(())
+}
+
+pub fn create_order_item(item: OrderItem) -> Result<OrderItem> {
+    let mut conn = Connection::open(get_db_path())?;
+    let tx = conn.transaction()?;
+    
+    tx.execute(
         "INSERT INTO order_item (order_id, sku_id, sku_code, product_name, quantity, cost_price, sale_price, total_cost_amount, total_sale_amount)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
         [
@@ -54,16 +74,30 @@ pub fn create_order_item(item: OrderItem) -> Result<OrderItem> {
         ],
     )?;
     
-    let id = conn.last_insert_rowid();
+    let id = tx.last_insert_rowid();
+    
+    // 更新订单总金额
+    update_order_totals(&tx, item.order_id)?;
+    
+    tx.commit()?;
+    
     let mut result = item;
     result.id = Some(id);
     Ok(result)
 }
 
 pub fn update_order_item(id: i64, item: OrderItem) -> Result<OrderItem> {
-    let conn = Connection::open(get_db_path())?;
+    let mut conn = Connection::open(get_db_path())?;
+    let tx = conn.transaction()?;
     
-    conn.execute(
+    // 先获取原来的order_id
+    let original_order_id: i64 = tx.query_row(
+        "SELECT order_id FROM order_item WHERE id = ?1",
+        [id],
+        |row| row.get(0)
+    )?;
+    
+    tx.execute(
         "UPDATE order_item 
          SET sku_id = ?1, sku_code = ?2, product_name = ?3, quantity = ?4, 
              cost_price = ?5, sale_price = ?6, total_cost_amount = ?7, total_sale_amount = ?8 
@@ -81,18 +115,36 @@ pub fn update_order_item(id: i64, item: OrderItem) -> Result<OrderItem> {
         ],
     )?;
     
+    // 更新订单总金额（使用原来的order_id，因为item.order_id可能为空）
+    update_order_totals(&tx, original_order_id)?;
+    
+    tx.commit()?;
+    
     let mut result = item;
     result.id = Some(id);
     Ok(result)
 }
 
 pub fn delete_order_item(id: i64) -> Result<()> {
-    let conn = Connection::open(get_db_path())?;
+    let mut conn = Connection::open(get_db_path())?;
+    let tx = conn.transaction()?;
     
-    conn.execute(
+    // 先获取order_id
+    let order_id: i64 = tx.query_row(
+        "SELECT order_id FROM order_item WHERE id = ?1",
+        [id],
+        |row| row.get(0)
+    )?;
+    
+    tx.execute(
         "DELETE FROM order_item WHERE id = ?1",
         [id],
     )?;
+    
+    // 更新订单总金额
+    update_order_totals(&tx, order_id)?;
+    
+    tx.commit()?;
     
     Ok(())
 }

@@ -65,6 +65,30 @@ export function usePurchaseList() {
     }
   };
 
+  const refreshCurrentOrder = async () => {
+    if (!selectedOrderId.value) return;
+    
+    try {
+      const order = await window.tauriAPI.order.get(String(selectedOrderId.value));
+      if (order) {
+        currentOrder.value = {
+          ...order,
+          customer_name: getCustomerNameById(order.customer_id)
+        };
+        // 同时更新processingOrders列表中的对应订单
+        const index = processingOrders.value.findIndex(o => o.id === selectedOrderId.value);
+        if (index !== -1) {
+          processingOrders.value[index] = {
+            ...order,
+            customer_name: getCustomerNameById(order.customer_id)
+          };
+        }
+      }
+    } catch (error) {
+      console.error('刷新当前订单失败:', error);
+    }
+  };
+
   const handleOrderChange = async (orderId) => {
     selectedOrderId.value = orderId;
     if (orderId) {
@@ -102,6 +126,7 @@ export function usePurchaseList() {
     loadProcessingOrders,
     loadOrderItems,
     handleOrderChange,
-    refreshOrderItems
+    refreshOrderItems,
+    refreshCurrentOrder
   };
 }

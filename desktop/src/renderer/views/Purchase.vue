@@ -33,7 +33,7 @@
           <el-descriptions-item label="订单编号">{{ currentOrder.order_no }}</el-descriptions-item>
           <el-descriptions-item label="客户名称">{{ currentOrder.customer_name }}</el-descriptions-item>
           <el-descriptions-item label="订单日期">{{ currentOrder.order_date }}</el-descriptions-item>
-          <el-descriptions-item label="总销售金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}&nbsp;<el-tag :type="currentOrder.is_settled === 1 ? 'success' : 'warning'">
+          <el-descriptions-item label="总金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}&nbsp;<el-tag :type="currentOrder.is_settled === 1 ? 'success' : 'warning'">
               {{ currentOrder.is_settled === 1 ? '已结算' : '未结算' }}
             </el-tag></el-descriptions-item>
         </el-descriptions>
@@ -138,6 +138,18 @@
         <el-form-item label="商品名称">
           <el-input v-model="form.product_name" disabled />
         </el-form-item>
+        <el-form-item label="单位">
+          <el-input v-model="form.unit" disabled />
+        </el-form-item>
+        <el-form-item label="规格">
+          <el-input v-model="form.spec" disabled />
+        </el-form-item>
+        <el-form-item label="箱规">
+          <el-input v-model="form.box_spec" disabled />
+        </el-form-item>
+        <el-form-item label="每箱数量">
+          <el-input-number v-model="form.box_quantity" :min="1" disabled />
+        </el-form-item>
         <el-form-item label="数量">
           <el-input-number v-model="form.quantity" :min="1" />
         </el-form-item>
@@ -176,7 +188,8 @@ const {
   getImageUrl,
   loadProcessingOrders,
   handleOrderChange,
-  refreshOrderItems
+  refreshOrderItems,
+  refreshCurrentOrder
 } = usePurchaseList();
 
 const { exportPDF } = usePurchaseExport({
@@ -212,6 +225,7 @@ const handleSave = async () => {
   const success = await saveOrderItem(selectedOrderId.value);
   if (success) {
     await refreshOrderItems();
+    await refreshCurrentOrder();
   }
 };
 
@@ -226,6 +240,7 @@ const handleDelete = async (id) => {
     const success = await deleteOrderItem(id);
     if (success) {
       await refreshOrderItems();
+      await refreshCurrentOrder();
     }
   } catch (error) {
     if (error !== 'cancel') {
@@ -312,3 +327,4 @@ loadProcessingOrders();
   color: #87898f;
 }
 </style>
+
