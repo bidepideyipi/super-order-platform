@@ -7,14 +7,35 @@ export function usePurchaseList() {
   const selectedOrderId = ref(null);
   const orderItems = ref([]);
   const loading = ref(false);
+  const currentOrder = ref(null);
+  const allCustomers = ref([]);
 
   const { imageUrls, getImageUrl, loadImageUrls } = useSKUImage();
+
+  const loadCustomers = async () => {
+    try {
+      const customers = await window.tauriAPI.customer.list();
+      allCustomers.value = customers;
+    } catch (error) {
+      console.error('加载客户列表失败:', error);
+      ElMessage.error('加载客户列表失败');
+    }
+  };
+
+  const getCustomerNameById = (customerId) => {
+    const customer = allCustomers.value.find(c => c.customer_id === customerId);
+    return customer ? customer.customer_name : customerId;
+  };
 
   const loadProcessingOrders = async () => {
     try {
       const result = await window.tauriAPI.purchase.getProcessingOrders();
-      processingOrders.value = result;
-      return result;
+      const ordersWithCustomerNames = result.map(order => ({
+        ...order,
+        customer_name: getCustomerNameById(order.customer_id)
+      }));
+      processingOrders.value = ordersWithCustomerNames;
+      return ordersWithCustomerNames;
     } catch (error) {
       console.error('加载采购中订单失败:', error);
       ElMessage.error('加载采购中订单失败');
@@ -46,6 +67,19 @@ export function usePurchaseList() {
 
   const handleOrderChange = async (orderId) => {
     selectedOrderId.value = orderId;
+    if (orderId) {
+      const order = processingOrders.value.find(order => order.id === orderId) || null;
+      if (order) {
+        currentOrder.value = {
+          ...order,
+          customer_name: getCustomerNameById(order.customer_id)
+        };
+      } else {
+        currentOrder.value = null;
+      }
+    } else {
+      currentOrder.value = null;
+    }
     return loadOrderItems(orderId);
   };
 
@@ -55,11 +89,14 @@ export function usePurchaseList() {
     }
   };
 
+  loadCustomers();
+
   return {
     processingOrders,
     selectedOrderId,
     orderItems,
     loading,
+    currentOrder,
     imageUrls,
     getImageUrl,
     loadProcessingOrders,

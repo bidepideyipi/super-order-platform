@@ -28,60 +28,88 @@
         </el-select>
       </div>
       
-      <el-table
-        :data="orderItems"
-        border
-        stripe
-        style="width: 100%; margin-top: 20px;"
-        v-loading="loading"
-      >
-        <el-table-column label="商品信息" min-width="250">
-          <template #default="{ row }">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 32px; height: 32px; object-fit: cover;" />
-              <span v-else>-</span>
-              <div>
-                <div>{{ row.product_name }}</div>
-                <div style="color: #999; font-size: 12px;">{{ row.sku_code }}</div>
-              </div>
+      <div v-if="currentOrder" class="order-info">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="订单编号">{{ currentOrder.order_no }}</el-descriptions-item>
+          <el-descriptions-item label="客户名称">{{ currentOrder.customer_name }}</el-descriptions-item>
+          <el-descriptions-item label="订单日期">{{ currentOrder.order_date }}</el-descriptions-item>
+          <el-descriptions-item label="总销售金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}&nbsp;<el-tag :type="currentOrder.is_settled === 1 ? 'success' : 'warning'">
+              {{ currentOrder.is_settled === 1 ? '已结算' : '未结算' }}
+            </el-tag></el-descriptions-item>
+        </el-descriptions>
+      </div>
+      
+      <div class="table-container">
+        <template v-if="orderItems.length > 0">
+          <el-table
+            :data="orderItems"
+            border
+            stripe
+            style="width: 100%;"
+            v-loading="loading"
+            max-height="600"
+          >
+            <el-table-column label="商品信息" min-width="250">
+              <template #default="{ row }">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <img v-if="row.sku_code" :src="getImageUrl(row.sku_code)" style="width: 32px; height: 32px; object-fit: cover;" />
+                  <span v-else>-</span>
+                  <div>
+                    <div>{{ row.product_name }}</div>
+                    <div style="color: #999; font-size: 12px;">{{ row.sku_code }}</div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+             <el-table-column label="产品规格" width="120">
+              <template #default="{ row }">
+                <div v-if="row.box_quantity > 1">{{row.spec}}*{{ row.box_spec }}/{{ row.unit }}</div>
+                <div v-else>{{row.spec}}/{{ row.unit }}</div>
+              </template>
+            </el-table-column>
+             <el-table-column label="数量" width="80" align="right">
+              <template #default="{ row }">
+                <div>{{ row.quantity}}{{ row.unit }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="单价" width="120" align="right">
+              <template #default="{ row }">
+                <div style="color: #67C23A;">¥{{ row.cost_price.toFixed(2) }}</div>
+                <div style="color: #409EFF;">¥{{ row.sale_price.toFixed(2) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="总价" width="120" align="right">
+              <template #default="{ row }">
+                <div style="color: #67C23A;">¥{{ row.total_cost_amount.toFixed(2) }}</div>
+                <div style="color: #409EFF;">¥{{ row.total_sale_amount.toFixed(2) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="利润" width="120" align="right">
+              <template #default="{ row }">
+                <div>¥{{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="200" fixed="right" align="center">
+              <template #default="{ row }">
+                <el-button size="small" :icon="Edit" @click="handleEdit(row)" />
+                <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+        <el-empty v-else description="请选择订单查看明细" style="margin-top: 20px;" />
+      </div>
+
+      <div v-if="currentOrder" class="remarks-section">
+        <el-card shadow="hover" style="margin-bottom: 20px; margin-top: 20px;">
+          <template #header>
+            <div class="card-header">
+              <span>备注</span>
             </div>
           </template>
-        </el-table-column>
-         <el-table-column label="产品规格" width="120">
-          <template #default="{ row }">
-            <div v-if="row.box_quantity > 1">{{row.spec}}*{{ row.box_spec }}/{{ row.unit }}</div>
-            <div v-else>{{row.spec}}/{{ row.unit }}</div>
-          </template>
-        </el-table-column>
-         <el-table-column label="数量" width="80" align="right">
-          <template #default="{ row }">
-            <div>{{ row.quantity}}{{ row.unit }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="单价" width="120" align="right">
-          <template #default="{ row }">
-            <div style="color: #67C23A;">¥{{ row.cost_price.toFixed(2) }}</div>
-            <div style="color: #409EFF;">¥{{ row.sale_price.toFixed(2) }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="总价" width="120" align="right">
-          <template #default="{ row }">
-            <div style="color: #67C23A;">¥{{ row.total_cost_amount.toFixed(2) }}</div>
-            <div style="color: #409EFF;">¥{{ row.total_sale_amount.toFixed(2) }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="利润" width="120" align="right">
-          <template #default="{ row }">
-            <div>¥{{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right" align="center">
-          <template #default="{ row }">
-            <el-button size="small" :icon="Edit" @click="handleEdit(row)" />
-            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
-          </template>
-        </el-table-column>
-      </el-table>
+          <div class="remarks-content" v-html="currentOrder.remarks || '-' "></div>
+        </el-card>
+      </div>
     </el-card>
     
     <el-dialog
@@ -143,6 +171,7 @@ const {
   selectedOrderId,
   orderItems,
   loading,
+  currentOrder,
   imageUrls,
   getImageUrl,
   loadProcessingOrders,
@@ -213,6 +242,26 @@ loadProcessingOrders();
 <style scoped>
 .purchase-page {
   padding: 20px;
+  height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.purchase-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.purchase-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.purchase-page::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.purchase-page::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .header-content {
@@ -229,11 +278,37 @@ loadProcessingOrders();
 .toolbar {
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
+}
+
+.order-info {
+  margin-bottom: 20px;
+}
+
+.remarks-section {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-container {
+  margin-top: 20px;
 }
 
 .sku-option {
   display: flex;
   align-items: center;
   width: 100%;
+}
+
+.remarks-content {
+  min-height: 100px;
+  padding: 10px;
+  white-space: pre-wrap;
+  color: #87898f;
 }
 </style>

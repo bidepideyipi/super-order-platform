@@ -44,18 +44,18 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="总成本金额">¥{{ currentOrder.total_cost_amount?.toFixed(2) || '0.00' }}</el-descriptions-item>
-          <el-descriptions-item label="总销售金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}</el-descriptions-item>
-          <el-descriptions-item label="备注" :span="2">{{ currentOrder.remarks || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="待结余金额">¥{{ latestBalance?.toFixed(2) || '0.00' }}</el-descriptions-item>
         </el-descriptions>
       </div>
       
-      <el-table
-        v-if="orderItems.length > 0"
-        :data="orderItems"
-        border
-        stripe
-        style="width: 100%; margin-top: 20px;"
-      >
+      <div class="table-container">
+        <el-table
+          v-if="orderItems.length > 0"
+          :data="orderItems"
+          border
+          stripe
+          style="width: 100%; margin-top: 20px;"
+        >
         <el-table-column label="商品信息" min-width="250">
           <template #default="{ row }">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -68,10 +68,10 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="每(单位)N件" width="200">
+        <el-table-column label="产品规格" width="120">
           <template #default="{ row }">
-            <div v-if="row.box_quantity > 1">每{{ row.unit }}{{ row.box_spec }}</div>
-            <div v-else>{{ row.unit }}</div>
+            <div v-if="row.box_quantity > 1">{{row.spec}}*{{ row.box_spec }}/{{ row.unit }}</div>
+            <div v-else>{{row.spec}}/{{ row.unit }}</div>
           </template>
         </el-table-column>
         <el-table-column label="数量" width="100" align="right">
@@ -79,13 +79,13 @@
             <div>{{ row.quantity }}{{ row.unit }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="成本价/销售价" width="120" align="right">
+        <el-table-column label="单价" width="120" align="right">
           <template #default="{ row }">
             <div style="color: #67C23A;">¥{{ row.cost_price.toFixed(2) }}</div>
             <div style="color: #409EFF;">¥{{ row.sale_price.toFixed(2) }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="总成本/总售价" width="120" align="right">
+        <el-table-column label="总价" width="120" align="right">
           <template #default="{ row }">
             <div style="color: #67C23A;">¥{{ row.total_cost_amount.toFixed(2) }}</div>
             <div style="color: #409EFF;">¥{{ row.total_sale_amount.toFixed(2) }}</div>
@@ -96,9 +96,26 @@
             <div>¥{{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}</div>
           </template>
         </el-table-column>
+        <el-table-column label="结余" width="120" align="right">
+          <template #default="{ row, $index }">
+            <div>¥{{ calculateBalance($index) }}</div>
+          </template>
+        </el-table-column>
       </el-table>
-      
-      <el-empty v-else description="请选择订单查看明细" />
+        
+        <el-empty v-else description="请选择订单查看明细" style="margin-top: 20px;" />
+      </div>
+
+      <div v-if="currentOrder" class="remarks-section">
+        <el-card shadow="hover" style="margin-bottom: 20px; margin-top: 20px;">
+          <template #header>
+            <div class="card-header">
+              <span>备注信息</span>
+            </div>
+          </template>
+          <div class="remarks-content" v-html="currentOrder.remarks || '-' "></div>
+        </el-card>
+      </div>
     </el-card>
   </div>
 </template>
@@ -124,21 +141,63 @@ const {
   loadImageUrls
 } = useSKUImage();
 
+const latestBalance = ref(0);
+
+const loadLatestBalance = async () => {
+  try {
+    const balance = await window.tauriAPI.financial.getBalance();
+    latestBalance.value = balance;
+  } catch (error) {
+    console.error('加载待结余金额失败:', error);
+    ElMessage.error('加载待结余金额失败');
+  }
+};
+
+const calculateBalance = (index) => {
+  let balance = latestBalance.value;
+  for (let i = 0; i <= index; i++) {
+    balance -= orderItems.value[i].total_cost_amount;
+  }
+  return balance.toFixed(2);
+};
+
 const handleOrderChangeWithImages = async (orderId) => {
   await handleOrderChange(orderId);
   if (orderItems.value.length > 0) {
     await loadImageUrls(orderItems.value);
   }
+  await loadLatestBalance();
 };
 
-onMounted(() => {
-  loadUnsettledOrders();
+onMounted(async () => {
+  await loadUnsettledOrders();
+  await loadLatestBalance();
 });
 </script>
 
 <style scoped>
 .settlement-page {
   padding: 20px;
+  height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.settlement-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settlement-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.settlement-page::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.settlement-page::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .header-content {
@@ -156,4 +215,26 @@ onMounted(() => {
 .order-info {
   margin-bottom: 20px;
 }
+
+.remarks-section {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-container {
+  margin-top: 20px;
+}
+
+.remarks-content {
+  min-height: 100px;
+  padding: 10px;
+  white-space: pre-wrap;
+  color: #87898f;
+}
+
 </style>

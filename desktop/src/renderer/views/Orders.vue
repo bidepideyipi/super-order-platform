@@ -109,7 +109,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="form.remarks" type="textarea" :rows="3" placeholder="请输入备注" :disabled="dialogMode === 'view'" />
+          <el-input v-model="form.remarks" type="textarea" :rows="5" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -215,4 +215,13 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
 }
+
+.remarks-content {
+  min-height: 100px;
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
+
 </style>
