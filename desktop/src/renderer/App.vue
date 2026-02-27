@@ -29,6 +29,10 @@
             <el-icon><ShoppingCart /></el-icon>
             <span>采购管理</span>
           </el-menu-item>
+          <el-menu-item index="/settlement">
+            <el-icon><Coin /></el-icon>
+            <span>结算管理</span>
+          </el-menu-item>
           <el-menu-item index="/financial">
             <el-icon><Wallet /></el-icon>
             <span>财务管理</span>
@@ -50,7 +54,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { HomeFilled, Goods, Document, User, ShoppingCart, Wallet } from '@element-plus/icons-vue';
+import { HomeFilled, Goods, Document, User, ShoppingCart, Wallet, Coin } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const route = useRoute();

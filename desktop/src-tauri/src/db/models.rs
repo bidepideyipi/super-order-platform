@@ -62,6 +62,7 @@ pub struct OrderItem {
     pub unit: String,
     pub box_spec: Option<String>,
     pub box_quantity: i64,
+    pub spec: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]

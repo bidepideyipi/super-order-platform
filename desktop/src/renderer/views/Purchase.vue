@@ -5,7 +5,7 @@
         <div class="header-content">
             <span>采购管理</span>
             <div class="header-actions">
-              <el-button @click="exportExcel" :disabled="!selectedOrderId || orderItems.length === 0">导出Excel</el-button>
+              <el-button @click="exportPDF" :disabled="!selectedOrderId || orderItems.length === 0">导出PDF</el-button>
               <el-button type="primary" @click="handleAdd" :disabled="!selectedOrderId">新增明细</el-button>
             </div>
           </div>
@@ -47,30 +47,30 @@
             </div>
           </template>
         </el-table-column>
-         <el-table-column label="每(单位)N件" width="200">
+         <el-table-column label="产品规格" width="120">
           <template #default="{ row }">
-            <div v-if="row.box_quantity > 1">每{{ row.unit }}{{ row.box_spec }}</div>
-            <div v-else>{{ row.unit }}</div>
+            <div v-if="row.box_quantity > 1">{{row.spec}}*{{ row.box_spec }}/{{ row.unit }}</div>
+            <div v-else>{{row.spec}}/{{ row.unit }}</div>
           </template>
         </el-table-column>
-         <el-table-column label="数量" width="100" align="right">
+         <el-table-column label="数量" width="80" align="right">
           <template #default="{ row }">
             <div>{{ row.quantity}}{{ row.unit }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="成本价/销售价" width="100" align="right">
+        <el-table-column label="单价" width="120" align="right">
           <template #default="{ row }">
             <div style="color: #67C23A;">¥{{ row.cost_price.toFixed(2) }}</div>
             <div style="color: #409EFF;">¥{{ row.sale_price.toFixed(2) }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="总成本/总售价" width="100" align="right">
+        <el-table-column label="总价" width="120" align="right">
           <template #default="{ row }">
             <div style="color: #67C23A;">¥{{ row.total_cost_amount.toFixed(2) }}</div>
             <div style="color: #409EFF;">¥{{ row.total_sale_amount.toFixed(2) }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="利润" width="100" align="right">
+        <el-table-column label="利润" width="120" align="right">
           <template #default="{ row }">
             <div>¥{{ (row.total_sale_amount - row.total_cost_amount).toFixed(2) }}</div>
           </template>
@@ -150,10 +150,11 @@ const {
   refreshOrderItems
 } = usePurchaseList();
 
-const { exportExcel } = usePurchaseExport({
+const { exportPDF } = usePurchaseExport({
   processingOrders,
   selectedOrderId,
-  orderItems
+  orderItems,
+  imageUrls
 });
 
 const {

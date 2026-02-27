@@ -34,6 +34,14 @@ const routes = [
     }
   },
   {
+    path: '/settlement',
+    name: 'Settlement',
+    component: () => {
+      console.log('Loading Settlement component');
+      return import('../views/Settlement.vue');
+    }
+  },
+  {
     path: '/customers',
     name: 'Customers',
     component: () => {

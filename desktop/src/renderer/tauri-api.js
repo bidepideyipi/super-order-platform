@@ -91,6 +91,7 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
 
       purchase: {
         getProcessingOrders: () => invoke('get_processing_orders'),
+        getUnsettledOrders: () => invoke('get_unsettled_orders'),
         getOrderItems: (orderId) => invoke('get_order_items', { orderId }),
         searchSkuByCode: (keyword) => invoke('search_sku_by_code', { keyword }),
         createOrderItem: (data) => invoke('create_order_item', { data }),
@@ -152,6 +153,7 @@ if (typeof window !== 'undefined' && window.__TAURI__) {
 
     purchase: {
       getProcessingOrders: () => Promise.resolve([]),
+      getUnsettledOrders: () => Promise.resolve([]),
       getOrderItems: () => Promise.resolve([])
     },
 

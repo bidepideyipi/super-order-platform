@@ -45,10 +45,10 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="每(单位)N件" width="200">
+        <el-table-column label="产品规格" width="200">
           <template #default="{ row }">
-            <div v-if="row.box_quantity > 1">每{{ row.unit }}{{ row.box_spec }}</div>
-            <div v-else>{{ row.unit }}</div>
+            <div v-if="row.box_quantity > 1">{{row.spec}}*{{ row.box_spec }}/{{ row.unit }}</div>
+            <div v-else>{{row.spec}}/{{ row.unit }}</div>
           </template>
         </el-table-column>
         <el-table-column prop="cost_price" label="成本价" width="100" align="right">

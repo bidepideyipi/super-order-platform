@@ -32,6 +32,37 @@ pub fn get_processing_orders() -> Result<Vec<Order>, String> {
 }
 
 #[tauri::command]
+pub fn get_unsettled_orders() -> Result<Vec<Order>, String> {
+    println!("get_unsettled_orders called");
+    let conn = get_db_path();
+    let rusqlite_conn = rusqlite::Connection::open(conn).map_err(|e| e.to_string())?;
+    
+    let mut stmt = rusqlite_conn.prepare(
+        "SELECT o.id, o.order_no, o.customer_id, o.order_date, o.status, o.is_settled, 
+                o.total_cost_amount, o.total_sale_amount, o.remarks
+         FROM `order` o 
+         WHERE o.is_settled = 0
+         ORDER BY o.created_at DESC"
+    ).map_err(|e| e.to_string())?;
+    
+    let orders = stmt.query_map([], |row| {
+        Ok(Order {
+            id: Some(row.get(0)?),
+            order_no: row.get(1)?,
+            customer_id: row.get(2)?,
+            order_date: row.get(3)?,
+            status: row.get(4)?,
+            is_settled: row.get::<_, i32>(5)? != 0,
+            total_cost_amount: row.get(6)?,
+            total_sale_amount: row.get(7)?,
+            remarks: row.get(8)?,
+        })
+    }).map_err(|e| e.to_string())?;
+    
+    orders.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn get_order_items(order_id: String) -> Result<Vec<OrderItem>, String> {
     println!("get_order_items called with order_id: {}", order_id);
     let order_id_parsed = order_id.parse::<i64>().map_err(|e| e.to_string())?;

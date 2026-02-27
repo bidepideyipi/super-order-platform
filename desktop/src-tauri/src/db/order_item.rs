@@ -7,7 +7,7 @@ pub fn get_order_items_by_order_id(order_id: i64) -> Result<Vec<OrderItem>> {
         "SELECT oi.id, oi.order_id, oi.sku_id, oi.sku_code, oi.product_name, oi.quantity, 
                 oi.cost_price, oi.sale_price, oi.total_cost_amount, oi.total_sale_amount,
                 COALESCE(s.unit, '') as unit, COALESCE(s.box_spec, '') as box_spec,
-                COALESCE(s.box_quantity, 1) as box_quantity
+                COALESCE(s.box_quantity, 1) as box_quantity, COALESCE(s.spec, '') as spec
          FROM order_item oi
          LEFT JOIN sku s ON oi.sku_id = s.id
          WHERE oi.order_id = ?1 
@@ -28,6 +28,7 @@ pub fn get_order_items_by_order_id(order_id: i64) -> Result<Vec<OrderItem>> {
             unit: row.get(10)?,
             box_spec: row.get(11)?,
             box_quantity: row.get(12)?,
+            spec: row.get(13)?,
         })
     })?;
     
