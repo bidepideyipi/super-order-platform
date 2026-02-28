@@ -27,7 +27,7 @@
           v-if="selectedUnsettledOrderId && currentOrder" 
           type="success" 
           @click="markAsSettled"
-          :disabled="currentOrder.is_settled === 1 || currentOrder.total_cost_amount <= 0"
+          :disabled="currentOrder.is_settled || currentOrder.total_cost_amount <= 0"
         >结算</el-button>
       </div>
       
@@ -37,8 +37,8 @@
           <el-descriptions-item label="客户名称">{{ currentOrder.customer_name }}</el-descriptions-item>
           <el-descriptions-item label="订单日期">{{ currentOrder.order_date }}</el-descriptions-item>
           <el-descriptions-item label="结算状态">
-            <el-tag :type="currentOrder.is_settled === 1 ? 'success' : 'warning'">
-              {{ currentOrder.is_settled === 1 ? '已结算' : '未结算' }}
+            <el-tag :type="currentOrder.is_settled ? 'success' : 'warning'">
+              {{ currentOrder.is_settled ? '已结算' : '未结算' }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="总成本金额">¥{{ currentOrder.total_cost_amount?.toFixed(2) || '0.00' }}</el-descriptions-item>
@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useSettlementList } from '../composables/useSettlementList';
 import { useSKUImage } from '../composables/useSKUImage';
@@ -129,27 +129,17 @@ const {
   currentOrder,
   orderItems,
   selectedUnsettledOrderId,
+  latestBalance,
   loadUnsettledOrders,
   handleOrderChange,
-  markAsSettled
+  markAsSettled,
+  loadLatestBalance
 } = useSettlementList();
 
 const {
   getImageUrl,
   loadImageUrls
 } = useSKUImage();
-
-const latestBalance = ref(0);
-
-const loadLatestBalance = async () => {
-  try {
-    const balance = await window.tauriAPI.financial.getBalance();
-    latestBalance.value = balance;
-  } catch (error) {
-    console.error('加载待结余金额失败:', error);
-    ElMessage.error('加载待结余金额失败');
-  }
-};
 
 const calculateBalance = (index) => {
   let balance = latestBalance.value;
@@ -164,7 +154,6 @@ const handleOrderChangeWithImages = async (orderId) => {
   if (orderItems.value.length > 0) {
     await loadImageUrls(orderItems.value);
   }
-  await loadLatestBalance();
 };
 
 onMounted(async () => {

@@ -24,12 +24,18 @@
         style="width: 100%; margin-top: 20px;"
       >
         <el-table-column prop="order_no" label="订单编号" width="150" />
-        <el-table-column prop="customer_id" label="客户编号" width="120" />
         <el-table-column prop="order_date" label="订单日期" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="is_settled" label="结算状态" width="120">
+          <template #default="{ row }">
+            <el-tag :type="row.is_settled ? 'success' : 'danger'">
+              {{ row.is_settled ? '已结算' : '未结算' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -51,7 +57,7 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleView(row)">查看</el-button>
-            <el-button size="small" @click="handleEdit(row)">状态管理</el-button>
+            <el-button size="small" @click="handleEdit(row)" :disabled="row.is_settled">状态管理</el-button>
           </template>
         </el-table-column>
       </el-table>

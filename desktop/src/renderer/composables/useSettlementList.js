@@ -10,6 +10,7 @@ export function useSettlementList() {
   const currentOrder = ref(null);
   const orderItems = ref([]);
   const selectedUnsettledOrderId = ref('');
+  const latestBalance = ref(0);
 
   /**
    * 加载客户列表
@@ -75,9 +76,25 @@ export function useSettlementList() {
 
       const items = await window.tauriAPI.purchase.getOrderItems(String(orderId));
       orderItems.value = items;
+      
+      // 加载最新余额
+      await loadLatestBalance();
     } catch (error) {
       console.error('加载订单详情失败:', error);
       ElMessage.error('加载订单详情失败');
+    }
+  };
+
+  /**
+   * 加载最新余额
+   */
+  const loadLatestBalance = async () => {
+    try {
+      const balance = await window.tauriAPI.financial.getBalance();
+      latestBalance.value = balance;
+    } catch (error) {
+      console.error('加载待结余金额失败:', error);
+      ElMessage.error('加载待结余金额失败');
     }
   };
 
@@ -97,6 +114,45 @@ export function useSettlementList() {
         type: 'warning'
       });
 
+      // 计算并更新每个订单明细的已结算金额
+      let currentBalance = latestBalance.value;
+      for (const item of orderItems.value) {
+        currentBalance -= item.total_cost_amount;
+        const updateData = {
+          ...item,
+          settled_amount: currentBalance
+        };
+        await window.tauriAPI.purchase.updateOrderItem(String(item.id), updateData);
+      }
+
+      // 计算总成本和利润
+      const totalCostAmount = currentOrder.value.total_cost_amount || 0;
+      const totalSaleAmount = currentOrder.value.total_sale_amount || 0;
+      const profit = totalSaleAmount - totalCostAmount;
+      const profitSettlement = profit / 2;
+
+      // 计算新余额
+      const costBalance = latestBalance.value + (totalCostAmount * -1);
+      const finalBalance = costBalance + (profitSettlement * -1);
+
+      // 创建财务交易记录
+      // 1. 成本价结算记录
+      await window.tauriAPI.financial.create({
+        category: '支出',
+        description: `采购单${currentOrder.value.order_no}成本价结算`,
+        amount_change: totalCostAmount * -1,
+        balance: costBalance
+      });
+
+      // 2. 利润结算记录
+      await window.tauriAPI.financial.create({
+        category: '支出',
+        description: `采购单${currentOrder.value.order_no}利润结算`,
+        amount_change: profitSettlement * -1,
+        balance: finalBalance
+      });
+
+      // 更新订单状态为已结算
       const updateData = {
         ...currentOrder.value,
         is_settled: true
@@ -107,6 +163,7 @@ export function useSettlementList() {
       currentOrder.value.is_settled = true;
       
       await loadUnsettledOrders();
+      await loadLatestBalance();
       
       ElMessage.success('订单已标记为已结算');
     } catch (error) {
@@ -122,8 +179,10 @@ export function useSettlementList() {
     currentOrder,
     orderItems,
     selectedUnsettledOrderId,
+    latestBalance,
     loadUnsettledOrders,
     handleOrderChange,
-    markAsSettled
+    markAsSettled,
+    loadLatestBalance
   };
 }

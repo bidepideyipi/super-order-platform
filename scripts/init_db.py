@@ -138,6 +138,7 @@ def init_database():
                 description TEXT,
                 amount_change REAL NOT NULL,
                 balance REAL NOT NULL,
+                is_settled INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """))

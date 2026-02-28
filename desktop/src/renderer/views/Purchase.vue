@@ -6,7 +6,7 @@
             <span>采购管理</span>
             <div class="header-actions">
               <el-button @click="exportPDF" :disabled="!selectedOrderId || orderItems.length === 0">导出PDF</el-button>
-              <el-button type="primary" @click="handleAdd" :disabled="!selectedOrderId">新增明细</el-button>
+              <el-button type="primary" @click="handleAdd" :disabled="!selectedOrderId || currentOrder?.is_settled">新增明细</el-button>
             </div>
           </div>
       </template>
@@ -33,8 +33,8 @@
           <el-descriptions-item label="订单编号">{{ currentOrder.order_no }}</el-descriptions-item>
           <el-descriptions-item label="客户名称">{{ currentOrder.customer_name }}</el-descriptions-item>
           <el-descriptions-item label="订单日期">{{ currentOrder.order_date }}</el-descriptions-item>
-          <el-descriptions-item label="总金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}&nbsp;<el-tag :type="currentOrder.is_settled === 1 ? 'success' : 'warning'">
-              {{ currentOrder.is_settled === 1 ? '已结算' : '未结算' }}
+          <el-descriptions-item label="总金额">¥{{ currentOrder.total_sale_amount?.toFixed(2) || '0.00' }}&nbsp;<el-tag :type="currentOrder.is_settled ? 'success' : 'warning'">
+              {{ currentOrder.is_settled ? '已结算' : '未结算' }}
             </el-tag></el-descriptions-item>
         </el-descriptions>
       </div>
@@ -91,8 +91,8 @@
             </el-table-column>
             <el-table-column label="操作" width="200" fixed="right" align="center">
               <template #default="{ row }">
-                <el-button size="small" :icon="Edit" @click="handleEdit(row)" />
-                <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
+                <el-button size="small" :icon="Edit" @click="handleEdit(row)" :disabled="currentOrder?.is_settled" />
+                <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" :disabled="currentOrder?.is_settled" />
               </template>
             </el-table-column>
           </el-table>
@@ -165,7 +165,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button type="primary" @click="handleSave" :disabled="currentOrder?.is_settled">保存</el-button>
       </template>
     </el-dialog>
   </div>
@@ -327,4 +327,3 @@ loadProcessingOrders();
   color: #87898f;
 }
 </style>
-

@@ -511,10 +511,11 @@ CREATE TABLE user (
 ```sql
 CREATE TABLE financial_transaction (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category TEXT NOT NULL COMMENT '分类（如：收入、支出）',
+    category TEXT NOT NULL COMMENT '分类（如：收入、支出、利润结算、采购结算、 冲正）',
     description TEXT COMMENT '说明',
-    amount_change REAL NOT NULL COMMENT '金额变化（正数为收入，负数为支出）',
+    amount_change REAL NOT NULL COMMENT '金额变化（收入、冲正为加，支出、利润结算、采购结算为减）',
     balance REAL NOT NULL COMMENT '结余',
+    is_settled INTEGER DEFAULT 0 COMMENT '是否结算',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 );
 ```
