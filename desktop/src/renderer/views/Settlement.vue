@@ -4,21 +4,24 @@
       <template #header>
         <div class="header-content">
           <span>结算管理</span>
+          <div class="header-actions">
+            <el-button @click="exportPDF" :disabled="!selectedUnsettledOrderId || orderItems.length === 0">导出PDF</el-button>
+          </div>
         </div>
       </template>
       
       <div class="toolbar">
         <el-select
           v-model="selectedUnsettledOrderId"
-          placeholder="请选择未结算订单"
+          placeholder="请选择订单编号"
           @change="handleOrderChangeWithImages"
-          style="width: 250px;"
+          style="width: 200px;"
           clearable
         >
           <el-option
-            v-for="order in unsettledOrders"
+            v-for="order in processingOrders"
             :key="order.id"
-            :label="`${order.order_no} (${order.customer_name})`"
+            :label="`${order.order_no}`"
             :value="order.id"
           />
         </el-select>
@@ -41,8 +44,6 @@
               {{ currentOrder.is_settled ? '已结算' : '未结算' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="总成本金额">¥{{ currentOrder.total_cost_amount?.toFixed(2) || '0.00' }}</el-descriptions-item>
-          <el-descriptions-item label="待结余金额">¥{{ latestBalance?.toFixed(2) || '0.00' }}</el-descriptions-item>
         </el-descriptions>
       </div>
       
@@ -123,9 +124,10 @@ import { onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useSettlementList } from '../composables/useSettlementList';
 import { useSKUImage } from '../composables/useSKUImage';
+import { useSettlementExport } from '../composables/useSettlementExport';
 
 const {
-  unsettledOrders,
+  processingOrders,
   currentOrder,
   orderItems,
   selectedUnsettledOrderId,
@@ -137,9 +139,18 @@ const {
 } = useSettlementList();
 
 const {
+  imageUrls,
   getImageUrl,
   loadImageUrls
 } = useSKUImage();
+
+const { exportPDF } = useSettlementExport({
+  processingOrders,
+  selectedOrderId: selectedUnsettledOrderId,
+  orderItems,
+  imageUrls,
+  latestBalance
+});
 
 const calculateBalance = (index) => {
   let balance = latestBalance.value;
@@ -191,6 +202,11 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .toolbar {

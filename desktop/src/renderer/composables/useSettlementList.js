@@ -6,7 +6,7 @@ import { FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT, FINANCIAL_CATEGORY_PROFIT_SETTL
  * 结算管理列表功能
  */
 export function useSettlementList() {
-  const unsettledOrders = ref([]);
+  const processingOrders = ref([]);
   const allCustomers = ref([]);
   const currentOrder = ref(null);
   const orderItems = ref([]);
@@ -35,21 +35,21 @@ export function useSettlementList() {
   };
 
   /**
-   * 加载未结算订单列表
+   * 加载采购中订单列表
    */
   const loadUnsettledOrders = async () => {
     try {
-      const orders = await window.tauriAPI.purchase.getUnsettledOrders();
+      const orders = await window.tauriAPI.purchase.getProcessingOrders();
       
       const ordersWithCustomerNames = orders.map(order => ({
         ...order,
         customer_name: getCustomerNameById(order.customer_id)
       }));
       
-      unsettledOrders.value = ordersWithCustomerNames;
+      processingOrders.value = ordersWithCustomerNames;
     } catch (error) {
-      console.error('加载未结算订单失败:', error);
-      ElMessage.error('加载未结算订单失败');
+      console.error('加载采购中订单失败:', error);
+      ElMessage.error('加载采购中订单失败');
     }
   };
 
@@ -178,7 +178,7 @@ export function useSettlementList() {
   };
 
   return {
-    unsettledOrders,
+    processingOrders,
     currentOrder,
     orderItems,
     selectedUnsettledOrderId,
