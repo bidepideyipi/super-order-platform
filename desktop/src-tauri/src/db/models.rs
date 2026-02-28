@@ -73,7 +73,15 @@ pub struct FinancialTransaction {
     pub amount_change: f64,
     pub balance: f64,
     pub created_at: Option<String>,
+    #[serde(default)]
+    pub is_settled: bool,
 }
+
+// Financial transaction category constants
+pub const FINANCIAL_CATEGORY_ADVANCE_PAYMENT: &str = "预收货款";
+pub const FINANCIAL_CATEGORY_PROFIT_SETTLEMENT: &str = "利润结算";
+pub const FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT: &str = "采购结算";
+pub const FINANCIAL_CATEGORY_REVERSAL: &str = "冲正";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaginatedResult<T> {

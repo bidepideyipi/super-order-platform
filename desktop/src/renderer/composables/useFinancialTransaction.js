@@ -1,6 +1,12 @@
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
+// Financial transaction category constants
+export const FINANCIAL_CATEGORY_ADVANCE_PAYMENT = '预收货款';
+export const FINANCIAL_CATEGORY_PROFIT_SETTLEMENT = '利润结算';
+export const FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT = '采购结算';
+export const FINANCIAL_CATEGORY_REVERSAL = '冲正';
+
 export function useFinancialTransaction() {
   const transactions = ref([]);
   const searchKeyword = ref('');
@@ -10,10 +16,11 @@ export function useFinancialTransaction() {
   
   const defaultForm = {
     id: null,
-    category: '收入',
+    category: FINANCIAL_CATEGORY_ADVANCE_PAYMENT,
     description: '',
     amount_change: 0,
-    balance: 0
+    balance: 0,
+    is_settled: false
   };
   
   const form = ref({ ...defaultForm });
@@ -25,13 +32,25 @@ export function useFinancialTransaction() {
 
   const totalIncome = computed(() => {
     return transactions.value
-      .filter(t => t.category === '收入')
+      .filter(t => t.category === FINANCIAL_CATEGORY_ADVANCE_PAYMENT)
       .reduce((sum, t) => sum + t.amount_change, 0);
   });
 
   const totalExpense = computed(() => {
     return transactions.value
-      .filter(t => t.category === '支出')
+      .filter(t => t.category === FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT)
+      .reduce((sum, t) => sum + Math.abs(t.amount_change), 0);
+  });
+
+  const totalProfit = computed(() => {
+    return transactions.value
+      .filter(t => t.category === FINANCIAL_CATEGORY_PROFIT_SETTLEMENT)
+      .reduce((sum, t) => sum + Math.abs(t.amount_change), 0);
+  });
+
+  const totalReversal = computed(() => {
+    return transactions.value
+      .filter(t => t.category === FINANCIAL_CATEGORY_REVERSAL)
       .reduce((sum, t) => sum + Math.abs(t.amount_change), 0);
   });
 
@@ -69,6 +88,15 @@ export function useFinancialTransaction() {
     }
 
     try {
+      // 对于冲正、利润结算、采购结算，金额变化为负值
+      if (
+        form.value.category === FINANCIAL_CATEGORY_REVERSAL ||
+        form.value.category === FINANCIAL_CATEGORY_PROFIT_SETTLEMENT ||
+        form.value.category === FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT
+      ) {
+        form.value.amount_change = Math.abs(form.value.amount_change) * -1;
+      }
+
       const newBalance = dialogMode.value === 'add' 
         ? currentBalance.value + form.value.amount_change
         : form.value.balance;
@@ -126,12 +154,18 @@ export function useFinancialTransaction() {
     currentBalance,
     totalIncome,
     totalExpense,
+    totalProfit,
+    totalReversal,
     loadData,
     handleSearch,
     handleAdd,
     handleEdit,
     handleSave,
     handleDelete,
-    resetForm
+    resetForm,
+    FINANCIAL_CATEGORY_ADVANCE_PAYMENT,
+    FINANCIAL_CATEGORY_PROFIT_SETTLEMENT,
+    FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT,
+    FINANCIAL_CATEGORY_REVERSAL
   };
 }

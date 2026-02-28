@@ -17,15 +17,19 @@
         />
         <el-select v-model="filterCategory" placeholder="筛选分类" @change="handleSearch" style="width: 150px;">
           <el-option label="全部" value="" />
-          <el-option label="收入" value="收入" />
-          <el-option label="支出" value="支出" />
+          <el-option :label="FINANCIAL_CATEGORY_ADVANCE_PAYMENT" :value="FINANCIAL_CATEGORY_ADVANCE_PAYMENT" />
+          <el-option :label="FINANCIAL_CATEGORY_PROFIT_SETTLEMENT" :value="FINANCIAL_CATEGORY_PROFIT_SETTLEMENT" />
+          <el-option :label="FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT" :value="FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT" />
+          <el-option :label="FINANCIAL_CATEGORY_REVERSAL" :value="FINANCIAL_CATEGORY_REVERSAL" />
         </el-select>
       </div>
       
       <div class="summary">
         <el-statistic title="当前结余" :value="currentBalance" :precision="2" />
-        <el-statistic title="总收入" :value="totalIncome" :precision="2" />
-        <el-statistic title="总支出" :value="totalExpense" :precision="2" />
+        <el-statistic title="总采购支出" :value="totalExpense" :precision="2" />
+        <el-statistic title="总利润" :value="totalProfit" :precision="2" />
+        <el-statistic title="总冲正" :value="totalReversal" :precision="2" />
+        <el-statistic title="总预收货款" :value="totalIncome" :precision="2" />
       </div>
       
       <el-table
@@ -36,7 +40,7 @@
       >
         <el-table-column prop="category" label="分类" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.category === '收入' ? 'success' : 'danger'">
+            <el-tag :type="getCategoryType(row.category)">
               {{ row.category }}
             </el-tag>
           </template>
@@ -72,15 +76,20 @@
       <el-form :model="form" label-width="100px">
         <el-form-item label="分类" required>
           <el-select v-model="form.category" placeholder="请选择分类">
-            <el-option label="收入" value="收入" />
-            <el-option label="支出" value="支出" />
+            <el-option :label="FINANCIAL_CATEGORY_ADVANCE_PAYMENT" :value="FINANCIAL_CATEGORY_ADVANCE_PAYMENT" />
+            <el-option :label="FINANCIAL_CATEGORY_PROFIT_SETTLEMENT" :value="FINANCIAL_CATEGORY_PROFIT_SETTLEMENT" />
+            <el-option :label="FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT" :value="FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT" />
+            <el-option :label="FINANCIAL_CATEGORY_REVERSAL" :value="FINANCIAL_CATEGORY_REVERSAL" />
           </el-select>
         </el-form-item>
         <el-form-item label="说明">
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入说明" />
         </el-form-item>
         <el-form-item label="金额" required>
-          <el-input-number v-model="form.amount_change" :precision="2" :min="-999999999" :max="999999999" />
+          <el-input-number v-model="form.amount_change" :precision="2" :min="1" :max="999999999" />
+        </el-form-item>
+        <el-form-item label="结算状态">
+          <el-switch v-model="form.is_settled" active-text="已结算" inactive-text="未结算" :disabled="true" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -106,12 +115,18 @@ const {
   currentBalance,
   totalIncome,
   totalExpense,
+  totalProfit,
+  totalReversal,
   loadData,
   handleSearch,
   handleAdd,
   handleEdit,
   handleSave,
-  handleDelete
+  handleDelete,
+  FINANCIAL_CATEGORY_ADVANCE_PAYMENT,
+  FINANCIAL_CATEGORY_PROFIT_SETTLEMENT,
+  FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT,
+  FINANCIAL_CATEGORY_REVERSAL
 } = useFinancialTransaction();
 
 const filteredTransactions = computed(() => {
@@ -130,6 +145,21 @@ const filteredTransactions = computed(() => {
   
   return result;
 });
+
+const getCategoryType = (category) => {
+  switch (category) {
+    case FINANCIAL_CATEGORY_ADVANCE_PAYMENT:
+      return 'success';
+    case FINANCIAL_CATEGORY_PROFIT_SETTLEMENT:
+      return 'warning';
+    case FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT:
+      return 'danger';
+    case FINANCIAL_CATEGORY_REVERSAL:
+      return 'info';
+    default:
+      return 'info';
+  }
+};
 
 onMounted(async () => {
   await loadData();
@@ -155,10 +185,18 @@ onMounted(async () => {
 
 .summary {
   display: flex;
-  gap: 40px;
+  gap: 20px;
   margin-top: 20px;
   padding: 20px;
   background-color: #f5f7fa;
   border-radius: 4px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .summary {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 </style>

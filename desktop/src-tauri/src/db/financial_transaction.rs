@@ -4,7 +4,7 @@ use crate::db::{FinancialTransaction, get_db_path};
 pub fn get_financial_transactions() -> Result<Vec<FinancialTransaction>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare(
-        "SELECT id, category, description, amount_change, balance, created_at 
+        "SELECT id, category, description, amount_change, balance, is_settled, created_at 
          FROM financial_transaction 
          ORDER BY created_at DESC"
     )?;
@@ -15,7 +15,8 @@ pub fn get_financial_transactions() -> Result<Vec<FinancialTransaction>> {
             description: row.get(2)?,
             amount_change: row.get(3)?,
             balance: row.get(4)?,
-            created_at: row.get(5)?,
+            is_settled: row.get(5)?,
+            created_at: row.get(6)?,
         })
     })?;
     
@@ -25,7 +26,7 @@ pub fn get_financial_transactions() -> Result<Vec<FinancialTransaction>> {
 pub fn get_financial_transaction(id: i64) -> Result<Option<FinancialTransaction>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare(
-        "SELECT id, category, description, amount_change, balance, created_at 
+        "SELECT id, category, description, amount_change, balance, is_settled, created_at 
          FROM financial_transaction 
          WHERE id = ?1"
     )?;
@@ -37,7 +38,8 @@ pub fn get_financial_transaction(id: i64) -> Result<Option<FinancialTransaction>
             description: row.get(2)?,
             amount_change: row.get(3)?,
             balance: row.get(4)?,
-            created_at: row.get(5)?,
+            is_settled: row.get(5)?,
+            created_at: row.get(6)?,
         })
     });
     
@@ -52,13 +54,14 @@ pub fn create_financial_transaction(transaction: FinancialTransaction) -> Result
     let conn = Connection::open(get_db_path())?;
     
     conn.execute(
-        "INSERT INTO financial_transaction (category, description, amount_change, balance)
-         VALUES (?1, ?2, ?3, ?4)",
+        "INSERT INTO financial_transaction (category, description, amount_change, balance, is_settled)
+         VALUES (?1, ?2, ?3, ?4, ?5)",
         [
             &transaction.category as &dyn rusqlite::ToSql,
             &transaction.description as &dyn rusqlite::ToSql,
             &transaction.amount_change as &dyn rusqlite::ToSql,
             &transaction.balance as &dyn rusqlite::ToSql,
+            &transaction.is_settled as &dyn rusqlite::ToSql,
         ],
     )?;
     
@@ -74,13 +77,14 @@ pub fn update_financial_transaction(id: i64, transaction: FinancialTransaction) 
     
     conn.execute(
         "UPDATE financial_transaction 
-         SET category = ?1, description = ?2, amount_change = ?3, balance = ?4 
-         WHERE id = ?5",
+         SET category = ?1, description = ?2, amount_change = ?3, balance = ?4, is_settled = ?5 
+         WHERE id = ?6",
         [
             &transaction.category as &dyn rusqlite::ToSql,
             &transaction.description as &dyn rusqlite::ToSql,
             &transaction.amount_change as &dyn rusqlite::ToSql,
             &transaction.balance as &dyn rusqlite::ToSql,
+            &transaction.is_settled as &dyn rusqlite::ToSql,
             &id as &dyn rusqlite::ToSql,
         ],
     )?;

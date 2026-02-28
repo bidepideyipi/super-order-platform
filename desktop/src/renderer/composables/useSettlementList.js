@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT, FINANCIAL_CATEGORY_PROFIT_SETTLEMENT } from './useFinancialTransaction';
 
 /**
  * 结算管理列表功能
@@ -138,18 +139,20 @@ export function useSettlementList() {
       // 创建财务交易记录
       // 1. 成本价结算记录
       await window.tauriAPI.financial.create({
-        category: '支出',
-        description: `采购单${currentOrder.value.order_no}成本价结算`,
+        category: FINANCIAL_CATEGORY_PURCHASE_SETTLEMENT,
+        description: `采购单${currentOrder.value.order_no}成本结算`,
         amount_change: totalCostAmount * -1,
-        balance: costBalance
+        balance: costBalance,
+        is_settled: true
       });
 
       // 2. 利润结算记录
       await window.tauriAPI.financial.create({
-        category: '支出',
+        category: FINANCIAL_CATEGORY_PROFIT_SETTLEMENT,
         description: `采购单${currentOrder.value.order_no}利润结算`,
         amount_change: profitSettlement * -1,
-        balance: finalBalance
+        balance: finalBalance,
+        is_settled: true
       });
 
       // 更新订单状态为已结算
