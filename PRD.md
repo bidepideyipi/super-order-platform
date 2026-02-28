@@ -484,6 +484,7 @@ CREATE TABLE order_item (
     sale_price REAL NOT NULL COMMENT '销售价',
     total_cost_amount REAL NOT NULL COMMENT '总成本',
     total_sale_amount REAL NOT NULL COMMENT '总售价',
+    settled_amount REAL DEFAULT 0 COMMENT '已结算金额',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES `order`(id),
     FOREIGN KEY (sku_id) REFERENCES sku(id)

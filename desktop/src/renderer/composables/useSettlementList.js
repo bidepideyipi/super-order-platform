@@ -91,7 +91,7 @@ export function useSettlementList() {
     }
 
     try {
-      await ElMessageBox.confirm('确定要将此订单标记为已结算吗？', '确认操作', {
+      await ElMessageBox.confirm('结算后订单将锁定编辑并进行结余，请确认列表展示内容无误后再点确定按键？', '确认操作', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -99,12 +99,12 @@ export function useSettlementList() {
 
       const updateData = {
         ...currentOrder.value,
-        is_settled: 1
+        is_settled: true
       };
 
       await window.tauriAPI.order.update(String(selectedUnsettledOrderId.value), updateData);
 
-      currentOrder.value.is_settled = 1;
+      currentOrder.value.is_settled = true;
       
       await loadUnsettledOrders();
       

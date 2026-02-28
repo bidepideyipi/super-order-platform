@@ -27,10 +27,8 @@
           v-if="selectedUnsettledOrderId && currentOrder" 
           type="success" 
           @click="markAsSettled"
-          :disabled="currentOrder.is_settled === 1"
-        >
-          {{ currentOrder.is_settled === 1 ? '已结算' : '标记为已结算' }}
-        </el-button>
+          :disabled="currentOrder.is_settled === 1 || currentOrder.total_cost_amount <= 0"
+        >结算</el-button>
       </div>
       
       <div v-if="currentOrder" class="order-info">
@@ -103,7 +101,7 @@
         </el-table-column>
       </el-table>
         
-        <el-empty v-else description="请选择订单查看明细" style="margin-top: 20px;" />
+        <el-empty v-else description="请先到采购管理界面新增明细吧！" style="margin-top: 20px;" />
       </div>
 
       <div v-if="currentOrder" class="remarks-section">

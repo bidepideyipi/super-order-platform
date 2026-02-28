@@ -97,7 +97,7 @@
             </el-table-column>
           </el-table>
         </template>
-        <el-empty v-else description="请选择订单查看明细" style="margin-top: 20px;" />
+        <el-empty v-else description="老板点右上角新增明细吧！" style="margin-top: 20px;" />
       </div>
 
       <div v-if="currentOrder" class="remarks-section">
