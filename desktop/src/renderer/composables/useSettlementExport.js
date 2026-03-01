@@ -62,7 +62,7 @@ export function useSettlementExport({ processingOrders, selectedOrderId, orderIt
     `;
   };
 
-  const generateTableHtml = (title, rows, totalCost, totalSale, currentPage, totalPages) => `
+  const generateTableHtml = (title, rows, totalCost, totalSale, totalProfit, currentPage, totalPages) => `
     <div style="padding: 10px;">
       <h2 style="text-align: center; margin-bottom: 30px;">${title}</h2>
       <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
@@ -81,14 +81,17 @@ export function useSettlementExport({ processingOrders, selectedOrderId, orderIt
         <tbody>
           ${rows}
           ${currentPage === totalPages ? `
-          <tr style="background-color: #c7510eff; font-weight: bold;">
-            <td colspan="4" style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">合计</td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
-              <div style="color: #fff; font-weight: bold;">¥${totalSale.toFixed(2)}</div>
+          <tr style="background-color: #f5f7fa; font-weight: bold;">
+            <td colspan="4" style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">合计</td>
+            <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
+            <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+              <div style="color: #67C23A; font-weight: bold;">¥${totalCost.toFixed(2)}</div>
+              <div style="color: #409EFF; font-weight: bold;">¥${totalSale.toFixed(2)}</div>
             </td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
+            <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+              <div style="color: #FFB800; font-weight: bold;">¥${totalProfit.toFixed(2)}</div>
+            </td>
+            <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
           </tr>
           ` : `
           <tr style="background-color: #f5f7fa; font-weight: bold;">
@@ -117,6 +120,7 @@ export function useSettlementExport({ processingOrders, selectedOrderId, orderIt
       
       const totalCost = orderItems.value.reduce((sum, item) => sum + item.total_cost_amount, 0);
       const totalSale = orderItems.value.reduce((sum, item) => sum + item.total_sale_amount, 0);
+      const totalProfit = totalSale - totalCost;
       
       const pageSize = 20;
       const totalPages = Math.ceil(orderItems.value.length / pageSize);
@@ -129,7 +133,7 @@ export function useSettlementExport({ processingOrders, selectedOrderId, orderIt
         const pageItems = orderItems.value.slice(startIndex, endIndex);
         
         const rows = pageItems.map((item, index) => generateRowHtml(item, startIndex + index)).join('');
-        const tableHtml = generateTableHtml(`结算明细单 - ${orderNo}`, rows, totalCost, totalSale, page + 1, totalPages);
+        const tableHtml = generateTableHtml(`结算明细单 - ${orderNo}`, rows, totalCost, totalSale, totalProfit, page + 1, totalPages);
         
         allPagesHtml += tableHtml;
         

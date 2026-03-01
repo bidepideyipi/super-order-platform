@@ -67,11 +67,11 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
         <tbody>
           ${rows}
           ${currentPage === totalPages ? `
-          <tr style="background-color: #c7510eff; font-weight: bold;">
+          <tr style="background-color: #f5f7fa; font-weight: bold;">
             <td colspan="4" style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">合计</td>
             <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
             <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
-              <div style="color: #fff; font-weight: bold;">¥${totalSale.toFixed(2)}</div>
+              <div style="color: #FFB800; font-weight: bold;">¥${totalSale.toFixed(2)}</div>
             </td>
           </tr>
           ` : `
