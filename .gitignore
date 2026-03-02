@@ -36,17 +36,17 @@ pnpm-debug.log*
 .env.*.local
 
 # Database
-*.db
+# *.db
 *.sqlite
 *.sqlite3
 
 # Desktop public images (user uploaded content)
-desktop/public/images/sku/*
-!desktop/public/images/sku/.gitkeep
+# desktop/public/images/sku/*
+# !desktop/public/images/sku/.gitkeep
 
 # OS
 Thumbs.db
 doc/*.xlsx
-data/
+# data/
 scripts/__pycache__/
 backend/__pycache__/
