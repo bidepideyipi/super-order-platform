@@ -50,3 +50,5 @@ doc/*.xlsx
 data/
 scripts/__pycache__/
 backend/__pycache__/
+
+.venv/
