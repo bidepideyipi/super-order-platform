@@ -24,12 +24,12 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
     
     return `
       <tr>
-        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">${index + 1}</td>
+        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: center; font-size: 14px;">${index + 1}</td>
         <td style="border: 1px solid #dcdfe6; padding: 6px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             ${imageHtml}
             <div>
-              <div style="font-weight: bold;">${item.product_name}</div>
+              <div style="font-weight: bold; font-size: 14px;">${item.product_name}</div>
               <div style="color: #999; font-size: 11px;">${item.sku_code}</div>
             </div>
           </div>
@@ -41,10 +41,10 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
           ${item.quantity}${item.unit}
         </td>
         <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
-          <div style="color: #409EFF;">¥${item.sale_price.toFixed(2)}</div>
+          ¥${item.sale_price.toFixed(2)}
         </td>
         <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
-          <div style="color: #409EFF;">¥${item.total_sale_amount.toFixed(2)}</div>
+          ¥${item.total_sale_amount.toFixed(2)}
         </td>
       </tr>
     `;
@@ -53,7 +53,7 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
   const generateTableHtml = (title, rows, totalCost, totalSale, currentPage, totalPages) => `
     <div style="padding: 10px;">
       <h2 style="text-align: center; margin-bottom: 30px;">${title}</h2>
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
         <thead>
           <tr style="background-color: #f5f7fa;">
             <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">序号</th>
@@ -113,7 +113,7 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
         const pageItems = orderItems.value.slice(startIndex, endIndex);
         
         const rows = pageItems.map((item, index) => generateRowHtml(item, startIndex + index)).join('');
-        const tableHtml = generateTableHtml(`出货明细单 - ${orderNo}`, rows, totalCost, totalSale, page + 1, totalPages);
+        const tableHtml = generateTableHtml(`${orderNo} - 出货明细单`, rows, totalCost, totalSale, page + 1, totalPages);
         
         allPagesHtml += tableHtml;
         

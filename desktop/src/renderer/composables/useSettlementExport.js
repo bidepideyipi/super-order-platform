@@ -133,7 +133,7 @@ export function useSettlementExport({ processingOrders, selectedOrderId, orderIt
         const pageItems = orderItems.value.slice(startIndex, endIndex);
         
         const rows = pageItems.map((item, index) => generateRowHtml(item, startIndex + index)).join('');
-        const tableHtml = generateTableHtml(`结算明细单 - ${orderNo}`, rows, totalCost, totalSale, totalProfit, page + 1, totalPages);
+        const tableHtml = generateTableHtml(`${orderNo} - 结算明细单`, rows, totalCost, totalSale, totalProfit, page + 1, totalPages);
         
         allPagesHtml += tableHtml;
         
