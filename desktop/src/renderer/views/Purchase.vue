@@ -122,7 +122,7 @@
           <el-autocomplete
             v-model="skuSearchKeyword"
             :fetch-suggestions="searchSku"
-            placeholder="请输入SKU编码"
+            placeholder="请输入SKU编码或商品名称"
             @select="handleSkuSelect"
             @keyup.enter="handleSkuEnter"
             clearable
@@ -153,8 +153,11 @@
         <el-form-item label="数量">
           <el-input-number v-model="form.quantity" :min="1" />
         </el-form-item>
+        <el-form-item label="总成本价">
+          <el-input-number v-model="form.total_cost_amount" :precision="2" :min="0" />
+        </el-form-item>
         <el-form-item label="成本价">
-          <el-input-number v-model="form.cost_price" :precision="2" :min="0" />
+          <el-input-number v-model="form.cost_price" :precision="2" :min="0" disabled />
         </el-form-item>
         <el-form-item label="销售价">
           <el-input-number v-model="form.sale_price" :precision="2" :min="0" />

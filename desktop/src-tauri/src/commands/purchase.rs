@@ -88,7 +88,7 @@ pub fn search_sku_by_code(keyword: String) -> Result<Vec<SKU>, String> {
                 s.box_spec, s.box_quantity, s.cost_price, s.sale_price, s.is_deleted, c.category_name 
          FROM sku s 
          LEFT JOIN sku_category c ON s.category_id = c.category_id 
-         WHERE s.sku_code LIKE ?1 AND s.is_deleted = 0
+         WHERE (s.sku_code LIKE ?1 OR s.name LIKE ?1) AND s.is_deleted = 0
          LIMIT 10"
     ).map_err(|e| e.to_string())?;
     

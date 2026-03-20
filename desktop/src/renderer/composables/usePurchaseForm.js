@@ -28,12 +28,18 @@ export function usePurchaseForm() {
 
   const form = ref({ ...defaultForm });
 
-  const calculateTotals = () => {
-    form.value.total_cost_amount = form.value.quantity * form.value.cost_price * form.value.box_quantity;
+  const calculateCostPrice = () => {
+    if (form.value.quantity > 0 && form.value.box_quantity > 0) {
+      form.value.cost_price = form.value.total_cost_amount / (form.value.quantity * form.value.box_quantity);
+    }
+  };
+
+  const calculateSaleTotal = () => {
     form.value.total_sale_amount = form.value.quantity * form.value.sale_price * form.value.box_quantity;
   };
 
-  watch(() => [form.value.quantity, form.value.cost_price, form.value.sale_price, form.value.box_quantity], calculateTotals);
+  watch(() => [form.value.total_cost_amount, form.value.quantity, form.value.box_quantity], calculateCostPrice);
+  watch(() => [form.value.quantity, form.value.sale_price, form.value.box_quantity], calculateSaleTotal);
 
   const searchSku = async (queryString, cb) => {
     if (!queryString) {
@@ -62,7 +68,8 @@ export function usePurchaseForm() {
     form.value.unit = item.unit;
     form.value.box_spec = item.box_spec;
     form.value.box_quantity = item.box_quantity;
-    calculateTotals();
+    form.value.total_cost_amount = form.value.quantity * form.value.cost_price * form.value.box_quantity;
+    calculateSaleTotal();
   };
 
   const handleSkuEnter = () => {
