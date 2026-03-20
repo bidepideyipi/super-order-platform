@@ -24,8 +24,8 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
     
     return `
       <tr>
-        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: center; font-size: 14px;">${index + 1}</td>
-        <td style="border: 1px solid #dcdfe6; padding: 6px;">
+        <td style="border: 1px solid #dcdfe6; padding: 5px; text-align: center; font-size: 14px;">${index + 1}</td>
+        <td style="border: 1px solid #dcdfe6; padding: 5px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             ${imageHtml}
             <div>
@@ -34,16 +34,16 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
             </div>
           </div>
         </td>
-        <td style="border: 1px solid #dcdfe6; padding: 6px;">
+        <td style="border: 1px solid #dcdfe6; padding: 5px;">
           ${specHtml}
         </td>
-        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+        <td style="border: 1px solid #dcdfe6; padding: 5px; text-align: right;">
           ${item.quantity}${item.unit}
         </td>
-        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+        <td style="border: 1px solid #dcdfe6; padding: 5px; text-align: right;">
           ¥${item.sale_price.toFixed(2)}
         </td>
-        <td style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+        <td style="border: 1px solid #dcdfe6; padding: 5px; text-align: right;">
           ¥${item.total_sale_amount.toFixed(2)}
         </td>
       </tr>
@@ -56,32 +56,32 @@ export function usePurchaseExport({ processingOrders, selectedOrderId, orderItem
       <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
         <thead>
           <tr style="background-color: #f5f7fa;">
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">序号</th>
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">商品信息</th>
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">产品规格</th>
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">数量</th>
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">单价</th>
-            <th style="border: 1px solid #dcdfe6; padding: 8px; text-align: center;">总价</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">序号</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">商品信息</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">产品规格</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">数量</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">单价</th>
+            <th style="border: 1px solid #dcdfe6; padding: 6px; text-align: center;">总价</th>
           </tr>
         </thead>
         <tbody>
           ${rows}
           ${currentPage === totalPages ? `
           <tr style="background-color: #f5f7fa; font-weight: bold;">
-            <td colspan="4" style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">合计</td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">-</td>
-            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 6px; text-align: right;">
+            <td colspan="4" style="color: #fff; border: 1px solid #dcdfe6; padding: 5px; text-align: right;">合计</td>
+            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 5px; text-align: right;">-</td>
+            <td style="color: #fff; border: 1px solid #dcdfe6; padding: 5px; text-align: right;">
               <div style="color: #FFB800; font-weight: bold;">¥${totalSale.toFixed(2)}</div>
             </td>
           </tr>
           ` : `
           <tr style="background-color: #f5f7fa; font-weight: bold;">
-            <td colspan="6" style="border: 1px solid #dcdfe6; padding: 6px; text-align: right;"></td>
+            <td colspan="6" style="border: 1px solid #dcdfe6; padding: 5px; text-align: right;"></td>
           </tr>
           ` }
         </tbody>
       </table>
-      <div style="text-align: center; margin-top: 20px; color: #999; font-size: 11px;">
+      <div style="text-align: center; margin-top: 10px; color: #999; font-size: 11px;">
         第 ${currentPage} 页 / 共 ${totalPages} 页
       </div>
     </div>
